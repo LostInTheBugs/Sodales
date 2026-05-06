@@ -1,6 +1,6 @@
 # VirtualTable RPG
 
-Table de jeu de rôle virtuelle en ligne — clone de Roll20, auto-hébergé.
+Table de jeu de rôle virtuelle en ligne, auto-hébergée.
 
 **Stack** : Node.js · Express · Socket.io · PostgreSQL · Docker · nginx
 
