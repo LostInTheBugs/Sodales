@@ -2,7 +2,8 @@
 """Generate Image-to-Video for cat portraits using LTX 2.3 GGUF on PCMaison"""
 import urllib.request, json, time, sys, os
 
-API = "http://COMFYUI_HOST:8188"
+COMFYUI_HOST = os.environ.get("COMFYUI_HOST", "127.0.0.1")
+API = f"http://{COMFYUI_HOST}:8188"
 
 def generate_i2v(portrait_url, output_prefix, seed=42):
     """Generate a short animation from a portrait image"""
@@ -91,8 +92,10 @@ if __name__ == "__main__":
     img_path = "/Users/frederic/Documents/OpenWork/virtualtable-rpg/frontend/img/cats-vagabond-portrait.jpg"
     
     # Use scp to copy to PCMaison ComfyUI input folder
+    COMFYUI_USER = os.environ.get("COMFYUI_USER", "comfyui")
+    COMFYUI_INPUT = os.environ.get("COMFYUI_INPUT_DIR", "~/ComfyUI/input")
     result = subprocess.run(
-        ["scp", img_path, "administrator@COMFYUI_HOST:/home/administrator/ComfyUI/input/cats-vagabond.jpg"],
+        ["scp", img_path, f"{COMFYUI_USER}@{COMFYUI_HOST}:{COMFYUI_INPUT}/cats-vagabond.jpg"],
         capture_output=True, text=True, timeout=30
     )
     print(f"Upload: {result.returncode}", flush=True)
@@ -101,6 +104,6 @@ if __name__ == "__main__":
         fn = generate_i2v("cats-vagabond.jpg", "cats_vagabond_i2v")
         if fn:
             print(f"\n📁 {fn}", flush=True)
-            print(f"🔗 http://COMFYUI_HOST:8188/view?filename={fn}&subfolder=video&type=output", flush=True)
+            print(f"🔗 {API}/view?filename={fn}&subfolder=video&type=output", flush=True)
     else:
         print(f"Upload failed: {result.stderr}", flush=True)

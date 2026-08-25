@@ -2,7 +2,8 @@
 """Generate LTX 2.3 video on remote ComfyUI"""
 import urllib.request, json, time, os, random, sys
 
-API = "http://COMFYUI_HOST:8188"
+COMFYUI_HOST = os.environ.get("COMFYUI_HOST", "127.0.0.1")
+API = f"http://{COMFYUI_HOST}:8188"
 OUTPUT = "/Users/frederic/Documents/OpenWork/comfyui/output"
 
 def queue(workflow):
@@ -102,7 +103,7 @@ if pid:
         print(f"✅ Vidéo générée: {path}")
         print(f"   Fichier sur PCMaison: /home/administrator/ComfyUI/output/{path}")
         print(f"   Tu peux le récupérer avec scp ou depuis l'interface web:")
-        print(f"   http://COMFYUI_HOST:8188/view?filename={path.split('/')[-1]}")
+        print(f"   {API}/view?filename={path.split('/')[-1]}")
     else:
         print("❌ Timeout")
 else:

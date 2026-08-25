@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Generate video with LTX 2.3 GGUF Q4_K_S on PCMaison"""
-import urllib.request, json, time, sys
+import urllib.request, json, time, sys, os
 
-API = "http://COMFYUI_HOST:8188"
+COMFYUI_HOST = os.environ.get("COMFYUI_HOST", "127.0.0.1")
+API = f"http://{COMFYUI_HOST}:8188"
 
 # The exact workflow from the user
 workflow = {

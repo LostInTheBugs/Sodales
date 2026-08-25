@@ -2,7 +2,8 @@
 """Generate LTX 2.3 video on PCMaison using workflow_api.json"""
 import urllib.request, json, time, sys, os
 
-API = "http://COMFYUI_HOST:8188"
+COMFYUI_HOST = os.environ.get("COMFYUI_HOST", "127.0.0.1")
+API = f"http://{COMFYUI_HOST}:8188"
 WORKFLOW_FILE = os.path.join(os.path.dirname(__file__), "workflow_api.json")
 
 def generate_video(prompt, duration=10, width=768, height=512):

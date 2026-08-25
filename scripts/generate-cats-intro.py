@@ -2,7 +2,8 @@
 """Generate intro video using remote ComfyUI"""
 import json, urllib.request, time, os, random, shutil
 
-API_URL = "http://COMFYUI_HOST:8188"
+COMFYUI_HOST = os.environ.get("COMFYUI_HOST", "127.0.0.1")
+API_URL = f"http://{COMFYUI_HOST}:8188"
 OUTPUT_DIR = "/Users/frederic/Documents/OpenWork/comfyui/output"
 
 def queue_prompt(workflow):
@@ -45,7 +46,7 @@ if __name__ == "__main__":
             print(f"✅ Connecté à ComfyUI sur {API_URL}")
     except Exception as e:
         print(f"❌ Impossible de se connecter à {API_URL}: {e}")
-        print("Vérifie que ComfyUI tourne bien sur http://COMFYUI_HOST:8188")
+        print(f"Vérifie que ComfyUI tourne bien sur {API_URL}")
         exit(1)
 
     # Check available models

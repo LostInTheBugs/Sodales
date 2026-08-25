@@ -213,7 +213,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:.
             <li class="fix"><strong>Faille cross-campagne</strong> — PUT/DELETE <code>/characters/:charId</code> vérifiait l'appartenance à la campagne mais pas que le personnage en faisait partie ; un membre pouvait modifier des personnages d'autres campagnes</li>
             <li class="fix"><strong>Injection via Socket.io</strong> — les événements <code>chat_message</code> et <code>dice_roll</code> acceptaient un <code>campaign_id</code> arbitraire ; désormais vérifié contre le <code>campaignId</code> de la session socket</li>
             <li class="fix"><strong>XSS dans les handouts</strong> — le rendu Markdown via <code>marked.parse()</code> n'était pas sanitisé ; ajout de DOMPurify pour filtrer le HTML dangereux</li>
-            <li class="fix"><strong>CORS</strong> — ALLOWED_ORIGIN pointait sur l'ancien domaine <code>ancien-domaine.cloudfr.net</code>, corrigé vers <code>virtualtable.cloudfr.net</code></li>
+            <li class="fix"><strong>CORS</strong> — ALLOWED_ORIGIN pointait sur l'ancien domaine de prod, corrigé vers <code>virtualtable.cloudfr.net</code></li>
           </ul>
         </div>
         <div class="change-group">

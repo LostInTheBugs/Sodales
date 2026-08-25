@@ -2,7 +2,8 @@
 """Generate TRUE Image-to-Video for cat portraits using LTX 2.3 on PCMaison"""
 import urllib.request, json, time, sys, os, http.client
 
-API = "http://COMFYUI_HOST:8188"
+COMFYUI_HOST = os.environ.get("COMFYUI_HOST", "127.0.0.1")
+API = f"http://{COMFYUI_HOST}:8188"
 IMG_DIR = "/Users/frederic/Documents/OpenWork/virtualtable-rpg/frontend/img"
 
 def upload_image(local_path):
@@ -11,7 +12,7 @@ def upload_image(local_path):
     boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW"
     fname = os.path.basename(local_path)
     body = (f"--{boundary}\r\nContent-Disposition: form-data; name=\"image\"; filename=\"{fname}\"\r\nContent-Type: image/jpeg\r\n\r\n").encode() + file_data + f"\r\n--{boundary}--\r\n".encode()
-    conn = http.client.HTTPConnection("COMFYUI_HOST", 8188, timeout=30)
+    conn = http.client.HTTPConnection(COMFYUI_HOST, 8188, timeout=30)
     conn.request("POST", "/upload/image", body, {"Content-Type": f"multipart/form-data; boundary={boundary}"})
     result = json.loads(conn.getresponse().read())
     conn.close()

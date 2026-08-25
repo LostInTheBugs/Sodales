@@ -2,7 +2,8 @@
 """Generate short T2V animations for all cat races (fast & reliable)"""
 import urllib.request, json, time, os, http.client
 
-API = "http://COMFYUI_HOST:8188"
+COMFYUI_HOST = os.environ.get("COMFYUI_HOST", "127.0.0.1")
+API = f"http://{COMFYUI_HOST}:8188"
 DIR = "/Users/frederic/Documents/OpenWork/virtualtable-rpg/frontend/img"
 
 RACES = [
