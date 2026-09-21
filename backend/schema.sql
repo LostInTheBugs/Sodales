@@ -1,5 +1,5 @@
 -- ============================================================
---  VirtualTable RPG — Schéma PostgreSQL
+--  Sodales — Schéma PostgreSQL
 -- ============================================================
 
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
@@ -114,6 +114,7 @@ ALTER TABLE maps ADD COLUMN IF NOT EXISTS walls   JSONB DEFAULT '[]';
 ALTER TABLE maps ADD COLUMN IF NOT EXISTS lights  JSONB DEFAULT '[]';
 ALTER TABLE maps ADD COLUMN IF NOT EXISTS objects JSONB DEFAULT '[]';
 ALTER TABLE tokens ADD COLUMN IF NOT EXISTS facing FLOAT DEFAULT 0;
+ALTER TABLE tokens ADD COLUMN IF NOT EXISTS hp_max INTEGER;
 
 -- ── Macros de jets de dés ────────────────────────────────────
 CREATE TABLE IF NOT EXISTS macros (
