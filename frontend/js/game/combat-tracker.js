@@ -44,7 +44,7 @@ function addEnemyRow(name='', ini=10, hp=10, color='') {
     <input type="number" class="ini-val" value="${ini}" min="1" max="40" title="Initiative" style="width:38px;"/>
     <span style="font-size:.7rem;color:var(--text2);">PV</span>
     <input type="number" class="enemy-hp-in" value="${hp}" min="1" title="PV max"/>
-    <button onclick="this.closest('.enemy-row').remove()" class="ini-roll-btn" style="color:var(--danger)">🗑</button>`;
+    <button data-act="removeClosest" data-a='[".enemy-row"]' class="ini-roll-btn" style="color:var(--danger)">🗑</button>`;
   list.appendChild(div);
 }
 
@@ -146,13 +146,13 @@ function renderTracker(state) {
     const hpPct = c.hp_max > 0 ? c.hp / c.hp_max : 0;
     const barClass = hpPct > 0.5 ? '' : hpPct > 0.25 ? ' low' : ' critical';
     const dead = c.hp <= 0;
-    return `<div class="ct-row${isCurrent ? ' current' : ''}${dead ? ' dead' : ''}" onclick="focusCombatant('${esc(c.name)}', ${c.char_id ? `'${c.char_id}'` : 'null'})" title="Centrer la vue sur ce combattant" style="cursor:pointer;">
+    return `<div class="ct-row${isCurrent ? ' current' : ''}${dead ? ' dead' : ''}" data-act="focusCombatant" data-a='["${esc(c.name)}", ${c.char_id ? `"${c.char_id}"` : 'null'}]' title="Centrer la vue sur ce combattant" style="cursor:pointer;">
       <span class="ct-arrow">${isCurrent ? '▶' : ''}</span>
       <span class="ct-ini">${c.initiative}</span>
       <span class="ct-dot" style="background:${c.color || '#888'}"></span>
       <span class="ct-name" title="${esc(c.name)}">${esc(c.name)}</span>
-      <span class="ct-hp" onclick="event.stopPropagation();editCombatantHP('${c.id}', ${c.hp}, ${c.hp_max}, this)" title="Cliquer pour modifier">${c.hp}/${c.hp_max}</span>
-      ${isGm ? `<button class="ct-remove" onclick="event.stopPropagation();removeCombatant('${c.id}')" title="Retirer">✕</button>` : ''}
+      <span class="ct-hp" data-act="editCombatantHP" data-a='["${c.id}", ${c.hp}, ${c.hp_max}, "$el"]' data-stop title="Cliquer pour modifier">${c.hp}/${c.hp_max}</span>
+      ${isGm ? `<button class="ct-remove" data-act="removeCombatant" data-a='["${c.id}"]' data-stop title="Retirer">✕</button>` : ''}
       <div class="ct-hp-bar${barClass}" style="width:${Math.max(0,hpPct)*100}%"></div>
     </div>`;
   }).join('');
@@ -187,7 +187,7 @@ function showIniBanner(characters) {
     return `<div class="ini-char-roll-row" data-idx="${i}">
       <span class="name">${esc(c.name)}</span>
       <span class="mod">${modStr}</span>
-      <button class="roll-btn" onclick="rerollIni(${i}, ${dexMod})">🎲</button>
+      <button class="roll-btn" data-act="rerollIni" data-a='[${i}, ${dexMod}]'>🎲</button>
       <input type="number" id="ini-banner-val-${i}" value="${defIni}" min="1" max="40"/>
     </div>`;
   }).join('');

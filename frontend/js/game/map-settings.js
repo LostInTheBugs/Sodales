@@ -538,7 +538,7 @@ function renderMapsList() {
   const list = document.getElementById('mapsList');
   if (!list) return;
   list.innerHTML = campaignMaps.map(m => `
-    <div class="map-item ${m.is_active ? 'active-map' : ''}" onclick="switchMap('${m.id}')" title="${esc(m.name)}">
+    <div class="map-item ${m.is_active ? 'active-map' : ''}" data-act="switchMap" data-a='["${m.id}"]' title="${esc(m.name)}">
       <span class="map-dot"></span>
       <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(m.name)}</span>
       ${m.is_active ? '<span style="font-size:.65rem;color:var(--accent);">●</span>' : ''}
@@ -766,7 +766,7 @@ function showConditionMenu(token, ex, ey) {
   // Conditions
   const conds = token.conditions || [];
   grid.innerHTML = CONDITIONS.map(c => `
-    <button class="cond-btn ${conds.includes(c.id) ? 'active' : ''}" onclick="toggleCondition('${c.id}')">
+    <button class="cond-btn ${conds.includes(c.id) ? 'active' : ''}" data-act="toggleCondition" data-a='["${c.id}"]'>
       ${c.icon} ${c.label}
     </button>`).join('');
 

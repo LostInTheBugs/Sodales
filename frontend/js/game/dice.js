@@ -23,7 +23,7 @@ function buildDiceStylePicker() {
   DICE_STYLES.forEach(s => {
     const hex = '#' + s.body.toString(16).padStart(6, '0');
     const active = s.id === currentStyle ? '1' : '0';
-    html += `<button class="dice-style-btn" data-style="${s.id}" onclick="selectDiceStyle('${s.id}')" title="${s.name} — ${s.desc}" style="background:${hex}" data-active="${active}"></button>`;
+    html += `<button class="dice-style-btn" data-style="${s.id}" data-act="selectDiceStyle" data-a='["${s.id}"]' title="${s.name} — ${s.desc}" style="background:${hex}" data-active="${active}"></button>`;
   });
   el.innerHTML = html;
 }

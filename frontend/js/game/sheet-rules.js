@@ -54,11 +54,11 @@ function addItemRow(name='', qty=1, weight=null) {
   // Auto-lookup weight if not provided
   const autoW = weight !== null ? weight : (lookupItemWeight(name) ?? '');
   const wVal  = autoW !== '' ? autoW : '';
-  div.innerHTML = `<span class="item-name"><input type="text" style="background:none;border:none;color:var(--text);width:100%;outline:none;" placeholder="Nom de l'objet" value="${esc(name)}" oninput="tryFillItemWeight(this)"/></span>
+  div.innerHTML = `<span class="item-name"><input type="text" style="background:none;border:none;color:var(--text);width:100%;outline:none;" placeholder="Nom de l'objet" value="${esc(name)}" data-act="tryFillItemWeight" data-a='["$el"]'/></span>
     <input type="number" class="item-qty" min="1" value="${qty}" title="Quantité"/>
     <input type="number" class="item-weight-inp" min="0" step="0.5" value="${wVal}" placeholder="kg" title="Poids (kg)"/>
     <span class="item-weight-unit">kg</span>
-    <button class="item-del" onclick="this.parentElement.remove()">🗑</button>`;
+    <button class="item-del" data-act="removeParent">🗑</button>`;
   list.appendChild(div);
 }
 
@@ -80,7 +80,7 @@ function addAttackRow(name='', atk_bonus=0, dmg_formula='1d6', dmg_type='') {
     <input type="number" placeholder="+5"            value="${atk_bonus}"               step="1" min="-10" max="30"/>
     <input type="text"   placeholder="1d8+3"         value="${esc(String(dmg_formula))}" maxlength="30"/>
     <input type="text"   placeholder="tranchant"     value="${esc(String(dmg_type))}"   maxlength="20"/>
-    <button class="atk-row-del" onclick="this.closest('.atk-row').remove()">✕</button>`;
+    <button class="atk-row-del" data-act="removeClosest" data-a='[".atk-row"]'>✕</button>`;
   list.appendChild(row);
 }
 
@@ -101,7 +101,7 @@ function addCapRow(name='', level='', desc='') {
   row.innerHTML = `
     <input type="text" placeholder="Nom de la capacité" value="${esc(String(name))}" maxlength="80" style="grid-column:1/3"/>
     <input type="number" placeholder="Niv" value="${level}" min="1" max="20" title="Niveau requis" style=""/>
-    <button class="cap-del-btn" onclick="this.closest('.cap-row').remove()" title="Supprimer">🗑</button>
+    <button class="cap-del-btn" data-act="removeClosest" data-a='[".cap-row"]' title="Supprimer">🗑</button>
     <textarea placeholder="Description brève…" style="grid-column:1/-1">${esc(String(desc))}</textarea>`;
   list.appendChild(row);
 }
@@ -112,7 +112,7 @@ function addSpellRow(name='', level=0) {
   div.className = 'item-row';
   div.innerHTML = `<span class="item-name"><input type="text" style="background:none;border:none;color:var(--text);width:100%;outline:none;" placeholder="Nom du sort" value="${esc(name)}"/></span>
     <input type="number" class="item-qty" min="0" max="9" value="${level}" title="Niveau du sort"/>
-    <button class="item-del" onclick="this.parentElement.remove()">🗑</button>`;
+    <button class="item-del" data-act="removeParent">🗑</button>`;
   list.appendChild(div);
 }
 
@@ -141,7 +141,7 @@ function buildProfRankPicker(containerId, key, currentRank) {
   el.innerHTML = PF2E_PROF_RANKS.map(({ rank, label, title }) => {
     const active = currentRank === rank ? `active active-${rank || 'none'}` : '';
     return `<button class="prof-rank-btn ${active}" title="${title}"
-      onclick="setProfRank(this,'${key}',${rank})">${label}</button>`;
+      data-act="setProfRank" data-a='["$el", "${key}", ${rank}]'>${label}</button>`;
   }).join('');
 }
 
@@ -177,7 +177,7 @@ function populatePF2eProfs(char) {
     const btns = PF2E_PROF_RANKS.map(({ rank: r, label, title }) => {
       const active = rank === r ? `active active-${r || 'none'}` : '';
       return `<button class="prof-rank-btn ${active}" title="${title}"
-        onclick="setProfRank(this,'${key}',${r})">${label}</button>`;
+        data-act="setProfRank" data-a='["$el", "${key}", ${r}]'>${label}</button>`;
     }).join('');
     return `<div class="prof-row">
       <span class="prof-name">${sk}</span>

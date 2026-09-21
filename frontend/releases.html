@@ -8,7 +8,8 @@
 <link rel="icon" type="image/png" href="/favicon.png?v=2026.09.001"/>
 <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2026.09.001"/>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
-<script defer src="/script.js" data-website-id="f30f0aac-dc25-407f-8f70-cc389c9df496"></script>
+<script src="/js/csp-actions.js?v=1"></script>
+  <script defer src="/script.js" data-website-id="f30f0aac-dc25-407f-8f70-cc389c9df496"></script>
 <style>
 :root{--bg:#0e0e14;--surface:#16161f;--surface2:#1e1e2a;--surface3:#242430;--border:#2a2a3a;--accent:#c9a227;--accent2:#8b5cf6;--text:#e8e0d0;--text2:#9990a8;--danger:#ef4444;--success:#22c55e;}
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -74,7 +75,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:.
   <a class="logo-sm" href="/lobby.html"><img class="brand-ico" src="/img/sodales-icon.png" alt=""/>Sodales</a>
   <div class="spacer"></div>
   <div class="user-dropdown" id="userDropdown">
-    <div class="dropdown-trigger" onclick="toggleDropdown()">
+    <div class="dropdown-trigger" data-act="toggleDropdown">
       <div class="avatar" id="userAvatar">?</div>
       <span id="userName">…</span>
       <span class="chevron">▼</span>
@@ -87,7 +88,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:.
       <div class="dropdown-sep"></div>
       <a class="dropdown-item" id="adminLink" href="/admin.html" style="display:none">🛡 Administration</a>
       <div class="dropdown-sep" id="adminSep" style="display:none"></div>
-      <button class="dropdown-item danger" onclick="logout()">🚪 Déconnexion</button>
+      <button class="dropdown-item danger" data-act="logout">🚪 Déconnexion</button>
     </div>
   </div>
 </header>
@@ -106,13 +107,33 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:.
 
   <div class="timeline">
 
-    <!-- 2026.09.011 — Actuelle -->
+    <!-- 2026.09.012 — Actuelle -->
     <div class="release latest">
+      <div class="release-dot"></div>
+      <div class="release-head">
+        <span class="release-version">2026.09.012</span>
+        <span class="release-date">Septembre 2026</span>
+        <span class="release-tag tag-latest">Actuelle</span>
+      </div>
+      <div class="release-body">
+        <div class="change-group">
+          <div class="change-group-title">Sécurité — Content-Security-Policy appliquée</div>
+          <ul class="change-list">
+            <li class="fix"><strong>Plus aucun code inline dans les pages</strong> — 360 gestionnaires (onclick, onchange…) remplacés par une délégation d'événements (<code>data-act</code> + registre de 224 actions), et les 9 scripts inline déplacés dans <code>js/page/*.js</code></li>
+            <li class="fix"><strong>CSP bloquante</strong> — <code>script-src 'self'</code> + CDN listés, sans <code>unsafe-inline</code> ni <code>unsafe-eval</code> : c'est la protection qui compte face aux ~146 innerHTML</li>
+            <li class="improve"><strong>Vérifié en vrai</strong> — 9 pages, 0 violation, 0 erreur JS, dés, panneaux, fiche et formulaires testés sous la politique bloquante</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2026.09.011 -->
+    <div class="release">
       <div class="release-dot"></div>
       <div class="release-head">
         <span class="release-version">2026.09.011</span>
         <span class="release-date">Septembre 2026</span>
-        <span class="release-tag tag-latest">Actuelle</span>
+        <span class="release-tag">Précédente</span>
       </div>
       <div class="release-body">
         <div class="change-group">
@@ -668,38 +689,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:.
 </div>
 
 <script src="/js/api.js?v=2"></script>
-<script>
-(async () => {
-  const token = getToken();
-  if (!token) { window.location.href = '/'; return; }
-  try {
-    const user = await API.auth.me();
-    setUser(user);
-    const av = document.getElementById('userAvatar');
-    if (user.avatar_url) av.innerHTML = `<img src="${user.avatar_url}" alt="${user.username}"/>`;
-    else av.textContent = user.username[0].toUpperCase();
-    document.getElementById('userName').textContent = user.username;
-    if (user.is_admin) {
-      document.getElementById('adminLink').style.display = '';
-      document.getElementById('adminSep').style.display = '';
-    }
-  } catch {
-    window.location.href = '/';
-  }
-})();
-
-function toggleDropdown() {
-  document.getElementById('dropdownMenu').classList.toggle('open');
-}
-document.addEventListener('click', e => {
-  if (!document.getElementById('userDropdown').contains(e.target))
-    document.getElementById('dropdownMenu').classList.remove('open');
-});
-function logout() {
-  clearToken();
-  localStorage.removeItem('rpg_user');
-  window.location.href = '/';
-}
-</script>
+<script src="/js/page/releases.js?v=1"></script>
+  <script src="/js/csp-registry.js?v=1"></script>
 </body>
 </html>

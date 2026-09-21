@@ -24,7 +24,7 @@ function showPortraitStatsTip(e) {
     const isStandard = !['Warhammer Fantasy','Call of Cthulhu','Shadowrun','Vampire: The Masquerade','Cyberpunk Red','Savage Worlds'].includes(currentSystemName());
     const mod = isStandard ? Math.floor((val - 10) / 2) : Math.floor((val - base) / 10);
     const ms  = (mod >= 0 ? '+' : '') + mod;
-    return `<div class="stat-box" onclick="quickStatRoll('${s}','${LABELS[i]}')" title="Jet de ${LABELS[i]} (1d20${ms})">
+    return `<div class="stat-box" data-act="quickStatRoll" data-a='["${s}", "${LABELS[i]}"]' title="Jet de ${LABELS[i]} (1d20${ms})">
       <div class="stat-val">${val}</div>
       <div class="stat-mod-disp">${ms}</div>
       <div class="stat-lbl">${LABELS[i]}</div>
@@ -108,7 +108,7 @@ function renderCharSidebarStats() {
     const isStandard = !['Warhammer Fantasy','Call of Cthulhu','Shadowrun','Vampire: The Masquerade','Cyberpunk Red','Savage Worlds'].includes(currentSystemName());
     const mod = Math.floor(((stats[a]||base) - base) / (isStandard ? 2 : 10)) + (proficiencies[a] ? prof : 0);
       const ms = (mod>=0?'+':'')+mod;
-      return `<div onclick="quickSaveRoll('${a}','${savingLabels[i]}')" style="background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:.2rem .4rem;font-size:.65rem;cursor:pointer;color:var(--text2)" title="JS ${savingLabels[i]} (1d20${ms})"><span style="color:var(--accent)">${ms}</span> ${savingLabels[i]}</div>`;
+      return `<div data-act="quickSaveRoll" data-a='["${a}", "${savingLabels[i]}"]' style="background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:.2rem .4rem;font-size:.65rem;cursor:pointer;color:var(--text2)" title="JS ${savingLabels[i]} (1d20${ms})"><span style="color:var(--accent)">${ms}</span> ${savingLabels[i]}</div>`;
     }).join('')}
     </div>`;
   // Sorts du personnage

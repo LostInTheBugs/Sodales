@@ -8,7 +8,8 @@
 <link rel="icon" type="image/png" href="/favicon.png?v=2026.09.001"/>
 <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2026.09.001"/>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="/js/csp-actions.js?v=1"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
 <script src="/js/items-weight.js?v=1"></script>
@@ -911,16 +912,16 @@ body.table-mode .zone-subtoolbar{display:none !important;}
   <span class="camp-title" id="campTitle">Chargement…</span>
   <span class="badge" id="roleBadge"></span>
   <div class="spacer"></div>
-  <div class="online-users" id="onlineUsersBtn" onclick="togglePlayersDropdown(event)">
+  <div class="online-users" id="onlineUsersBtn" data-act="togglePlayersDropdown" data-a='["$event"]'>
     <div class="user-dot"></div>
     <span id="onlineCount">0 en ligne</span>
     <div class="players-dropdown" id="playersDropdown"></div>
   </div>
-  <button class="btn-icon" id="btnAddToken" onclick="startPlaceToken()" style="display:none">＋ Token</button>
+  <button class="btn-icon" id="btnAddToken" data-act="startPlaceToken" style="display:none">＋ Token</button>
   <a class="btn-icon" id="btnSettings" href="#" style="display:none;text-decoration:none;" title="Réglages de la campagne" target="_blank">⚙ Réglages</a>
-  <button class="btn-icon" id="btnAudio" onclick="toggleAudioPanel()">🎵 Musique</button>
-  <button class="btn-icon" id="btnCombat" onclick="toggleCombatPanel()" title="Traqueur d'initiative">⚔ Initiative</button>
-  <button class="btn-icon" onclick="window.location.href='/lobby.html'">← Lobby</button>
+  <button class="btn-icon" id="btnAudio" data-act="toggleAudioPanel">🎵 Musique</button>
+  <button class="btn-icon" id="btnCombat" data-act="toggleCombatPanel" title="Traqueur d'initiative">⚔ Initiative</button>
+  <button class="btn-icon" data-act="goto" data-a='["/lobby.html"]'>← Lobby</button>
 </header>
 
 <div class="game-layout">
@@ -931,7 +932,7 @@ body.table-mode .zone-subtoolbar{display:none !important;}
     <div class="sidebar-section">
       <div class="sidebar-title">Personnage actif</div>
       <div id="charSheet">
-        <select class="char-select" id="charSelector" onchange="selectChar(this.value)">
+        <select class="char-select" id="charSelector" data-act="selectChar" data-a='["$value"]'>
           <option value="">— Aucun personnage —</option>
         </select>
         <div id="charInfo" style="display:none">
@@ -943,7 +944,7 @@ body.table-mode .zone-subtoolbar{display:none !important;}
             </div>
           </div>
           <div class="hp-bar-wrap">
-            <div class="hp-label"><span>PV</span><span><input type="number" id="hpCurrent" min="0" style="width:40px;padding:0;background:none;border:none;color:var(--accent);font-size:.82rem;text-align:right;" onchange="updateHP()"> / <span id="hpMax">—</span></span></div>
+            <div class="hp-label"><span>PV</span><span><input type="number" id="hpCurrent" min="0" style="width:40px;padding:0;background:none;border:none;color:var(--accent);font-size:.82rem;text-align:right;" data-act="updateHP"> / <span id="hpMax">—</span></span></div>
             <div class="hp-bar"><div class="hp-fill" id="hpFill" style="width:100%"></div></div>
           </div>
           <div class="ac-spd">
@@ -951,7 +952,7 @@ body.table-mode .zone-subtoolbar{display:none !important;}
             <div class="mini-stat" id="encumbranceStat"><div class="v" id="charCarry">—</div><div class="l" id="encumbranceLabel">Charge</div></div>
             <div class="mini-stat"><div class="v" id="charLevel">—</div><div class="l">Niveau</div></div>
           </div>
-          <button class="btn-edit-char" onclick="openCharSheetModal()">✏ Modifier la fiche</button>
+          <button class="btn-edit-char" data-act="openCharSheetModal">✏ Modifier la fiche</button>
         </div>
       </div>
     </div>
@@ -961,10 +962,10 @@ body.table-mode .zone-subtoolbar{display:none !important;}
       <div class="sidebar-title" style="display:flex;align-items:center;justify-content:space-between;">
         Cartes
         <div style="display:flex;gap:.3rem;align-items:center;">
-          <button class="btn-xs btn-primary" onclick="openNewMapModal()" style="font-size:.68rem;">＋</button>
+          <button class="btn-xs btn-primary" data-act="openNewMapModal" style="font-size:.68rem;">＋</button>
           <label class="btn-xs" title="Importer une carte UVTT (.uvtt / .json)" style="background:var(--accent2,#5c8dc4);color:#fff;border:none;padding:.15rem .4rem;border-radius:3px;cursor:pointer;font-size:.68rem;line-height:1.3;">
             📥
-            <input type="file" accept=".uvtt,.json" style="display:none" onchange="processUvttFile(event)">
+            <input type="file" accept=".uvtt,.json" style="display:none" data-act="processUvttFile" data-a='["$event"]'>
           </label>
         </div>
       </div>
@@ -975,14 +976,14 @@ body.table-mode .zone-subtoolbar{display:none !important;}
     <div class="sidebar-section" style="flex:1;overflow-y:auto;">
       <div class="sidebar-title">Lancer de dés</div>
       <div class="dice-grid">
-        <div class="die-btn" onclick="rollDie('d4')">d4</div>
-        <div class="die-btn" onclick="rollDie('d6')">d6</div>
-        <div class="die-btn" onclick="rollDie('d8')">d8</div>
-        <div class="die-btn" onclick="rollDie('d10')">d10</div>
-        <div class="die-btn" onclick="rollDie('d12')">d12</div>
-        <div class="die-btn" onclick="rollDie('d20')">d20</div>
-        <div class="die-btn" onclick="rollDie('d100')">d%</div>
-        <div class="die-btn" onclick="rollDie('2d6')">2d6</div>
+        <div class="die-btn" data-act="rollDie" data-a='["d4"]'>d4</div>
+        <div class="die-btn" data-act="rollDie" data-a='["d6"]'>d6</div>
+        <div class="die-btn" data-act="rollDie" data-a='["d8"]'>d8</div>
+        <div class="die-btn" data-act="rollDie" data-a='["d10"]'>d10</div>
+        <div class="die-btn" data-act="rollDie" data-a='["d12"]'>d12</div>
+        <div class="die-btn" data-act="rollDie" data-a='["d20"]'>d20</div>
+        <div class="die-btn" data-act="rollDie" data-a='["d100"]'>d%</div>
+        <div class="die-btn" data-act="rollDie" data-a='["2d6"]'>2d6</div>
       </div>
       <div class="modifier-row">
         <label>Modif.</label>
@@ -990,7 +991,7 @@ body.table-mode .zone-subtoolbar{display:none !important;}
       </div>
       <div style="margin-top:.6rem;padding:.5rem;background:var(--surface2);border-radius:8px;font-size:.78rem;color:var(--text2);min-height:2rem;" id="lastRollResult">—</div>
       <div style="text-align:center;margin-top:.4rem;">
-        <button class="btn-3d-toggle" id="btn3dToggle" onclick="toggle3DDice()">🎲 Dés 3D : OFF</button>
+        <button class="btn-3d-toggle" id="btn3dToggle" data-act="toggle3DDice">🎲 Dés 3D : OFF</button>
         <div id="diceStylePicker" style="display:none;margin-top:.3rem;flex-wrap:wrap;gap:.3rem;justify-content:center;align-items:center;">
           <!-- Rempli dynamiquement par buildDiceStylePicker() -->
         </div>
@@ -1005,15 +1006,15 @@ body.table-mode .zone-subtoolbar{display:none !important;}
     <!-- Menu météo MJ -->
     <div class="weather-menu" id="weatherMenu">
       <div style="font-size:.65rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;padding:.1rem .5rem .3rem;">Effets météo</div>
-      <div class="weather-opt active" id="wopt-none" onclick="setWeather('none')"><span class="weather-opt-icon">✕</span>Aucun</div>
-      <div class="weather-opt" id="wopt-rain" onclick="setWeather('rain')"><span class="weather-opt-icon">🌧</span>Pluie</div>
-      <div class="weather-opt" id="wopt-snow" onclick="setWeather('snow')"><span class="weather-opt-icon">❄</span>Neige</div>
-      <div class="weather-opt" id="wopt-fog" onclick="setWeather('fog')"><span class="weather-opt-icon">🌫</span>Brouillard</div>
-      <div class="weather-opt" id="wopt-embers" onclick="setWeather('embers')"><span class="weather-opt-icon">🔥</span>Braise</div>
-      <div class="weather-opt" id="wopt-stars" onclick="setWeather('stars')"><span class="weather-opt-icon">✨</span>Étoiles</div>
+      <div class="weather-opt active" id="wopt-none" data-act="setWeather" data-a='["none"]'><span class="weather-opt-icon">✕</span>Aucun</div>
+      <div class="weather-opt" id="wopt-rain" data-act="setWeather" data-a='["rain"]'><span class="weather-opt-icon">🌧</span>Pluie</div>
+      <div class="weather-opt" id="wopt-snow" data-act="setWeather" data-a='["snow"]'><span class="weather-opt-icon">❄</span>Neige</div>
+      <div class="weather-opt" id="wopt-fog" data-act="setWeather" data-a='["fog"]'><span class="weather-opt-icon">🌫</span>Brouillard</div>
+      <div class="weather-opt" id="wopt-embers" data-act="setWeather" data-a='["embers"]'><span class="weather-opt-icon">🔥</span>Braise</div>
+      <div class="weather-opt" id="wopt-stars" data-act="setWeather" data-a='["stars"]'><span class="weather-opt-icon">✨</span>Étoiles</div>
       <div class="weather-intensity">
         <span>Intensité</span>
-        <input type="range" id="weatherIntensity" min="1" max="10" value="5" oninput="setWeatherIntensity(this.value)">
+        <input type="range" id="weatherIntensity" min="1" max="10" value="5" data-act="setWeatherIntensity" data-a='["$value"]'>
         <span id="weatherIntLabel">5</span>
       </div>
     </div>
@@ -1023,52 +1024,52 @@ body.table-mode .zone-subtoolbar{display:none !important;}
       <div id="objPickerGrid" style="display:flex;flex-wrap:wrap;gap:.3rem;justify-content:center;"></div>
     </div>
     <div class="map-toolbar">
-      <button class="tool-btn active" id="tool-select" onclick="setTool('select')" title="Sélectionner">↖ Select</button>
-      <button class="tool-btn" id="tool-measure" onclick="setTool('measure')" title="Mesurer distance">📏 Mesure</button>
-      <button class="tool-btn" id="tool-zones" onclick="setTool('zones')" title="Zones de sorts (cercle, cône, ligne)">🔮 Zones</button>
-      <button class="tool-btn" id="tool-draw" onclick="setTool('draw')" title="Dessiner & annoter (touche D)">✏ Draw</button>
-      <button class="tool-btn" id="tool-fog" onclick="setTool('fog')" title="Peindre le brouillard" style="display:none">🌫️</button>
-      <button class="tool-btn" id="tool-walls" onclick="setTool('walls')" title="Dessiner des murs (bloque la vision)" style="display:none">🧱 Murs</button>
-      <button class="tool-btn" id="tool-objects" onclick="setTool('objects')" title="Placer des objets sur la carte" style="display:none">📦 Objets</button>
-      <button class="tool-btn" onclick="zoomIn()" title="Zoom + (touche +)">＋</button>
-      <button class="tool-btn" onclick="zoomOut()" title="Zoom - (touche -)">－</button>
-      <button class="tool-btn" onclick="resetView()" title="Centrer (touche 0)">⊙</button>
-      <button class="tool-btn" id="toggleGridBtn" onclick="toggleGrid()" title="Toggle grille (touche G)" style="opacity:.6">▦</button>
-      <button class="tool-btn" id="toggleHexBtn" onclick="toggleHexGrid()" title="Grille hexagonale" style="opacity:.5">⬡</button>
-      <button class="tool-btn" id="tool-bg" onclick="openBgModal()" title="Fond de carte" style="display:none">🖼</button>
-      <button class="tool-btn" id="weatherBtn" onclick="toggleWeatherMenu()" title="Effets météo (MJ)" style="display:none">🌦</button>
-      <button class="tool-btn" id="nightModeBtn" onclick="toggleNightModeGM()" title="Mode nuit (éclairage dynamique)" style="display:none">🌙 Nuit</button>
-      <button class="tool-btn" onclick="showHotkeys()" title="Raccourcis clavier" style="margin-left:auto;opacity:.5;font-size:.65rem;">⌨</button>
+      <button class="tool-btn active" id="tool-select" data-act="setTool" data-a='["select"]' title="Sélectionner">↖ Select</button>
+      <button class="tool-btn" id="tool-measure" data-act="setTool" data-a='["measure"]' title="Mesurer distance">📏 Mesure</button>
+      <button class="tool-btn" id="tool-zones" data-act="setTool" data-a='["zones"]' title="Zones de sorts (cercle, cône, ligne)">🔮 Zones</button>
+      <button class="tool-btn" id="tool-draw" data-act="setTool" data-a='["draw"]' title="Dessiner & annoter (touche D)">✏ Draw</button>
+      <button class="tool-btn" id="tool-fog" data-act="setTool" data-a='["fog"]' title="Peindre le brouillard" style="display:none">🌫️</button>
+      <button class="tool-btn" id="tool-walls" data-act="setTool" data-a='["walls"]' title="Dessiner des murs (bloque la vision)" style="display:none">🧱 Murs</button>
+      <button class="tool-btn" id="tool-objects" data-act="setTool" data-a='["objects"]' title="Placer des objets sur la carte" style="display:none">📦 Objets</button>
+      <button class="tool-btn" data-act="zoomIn" title="Zoom + (touche +)">＋</button>
+      <button class="tool-btn" data-act="zoomOut" title="Zoom - (touche -)">－</button>
+      <button class="tool-btn" data-act="resetView" title="Centrer (touche 0)">⊙</button>
+      <button class="tool-btn" id="toggleGridBtn" data-act="toggleGrid" title="Toggle grille (touche G)" style="opacity:.6">▦</button>
+      <button class="tool-btn" id="toggleHexBtn" data-act="toggleHexGrid" title="Grille hexagonale" style="opacity:.5">⬡</button>
+      <button class="tool-btn" id="tool-bg" data-act="openBgModal" title="Fond de carte" style="display:none">🖼</button>
+      <button class="tool-btn" id="weatherBtn" data-act="toggleWeatherMenu" title="Effets météo (MJ)" style="display:none">🌦</button>
+      <button class="tool-btn" id="nightModeBtn" data-act="toggleNightModeGM" title="Mode nuit (éclairage dynamique)" style="display:none">🌙 Nuit</button>
+      <button class="tool-btn" data-act="showHotkeys" title="Raccourcis clavier" style="margin-left:auto;opacity:.5;font-size:.65rem;">⌨</button>
     </div>
     <!-- Sous-toolbar zones de sorts -->
     <div class="zone-subtoolbar" id="zoneSubtoolbar">
-      <button class="zone-type-btn active" id="zt-circle"  onclick="setZoneType('circle')">⬤ Cercle</button>
-      <button class="zone-type-btn"        id="zt-cone"    onclick="setZoneType('cone')">▶ Cône</button>
-      <button class="zone-type-btn"        id="zt-line"    onclick="setZoneType('line')">━ Ligne</button>
+      <button class="zone-type-btn active" id="zt-circle"  data-act="setZoneType" data-a='["circle"]'>⬤ Cercle</button>
+      <button class="zone-type-btn"        id="zt-cone"    data-act="setZoneType" data-a='["cone"]'>▶ Cône</button>
+      <button class="zone-type-btn"        id="zt-line"    data-act="setZoneType" data-a='["line"]'>━ Ligne</button>
       <div class="zone-sep"></div>
-      <div class="zone-color-dot active" id="zc-0" style="background:#ef4444" onclick="setZoneColor(0)" title="Rouge"></div>
-      <div class="zone-color-dot"        id="zc-1" style="background:#3b82f6" onclick="setZoneColor(1)" title="Bleu"></div>
-      <div class="zone-color-dot"        id="zc-2" style="background:#22c55e" onclick="setZoneColor(2)" title="Vert"></div>
-      <div class="zone-color-dot"        id="zc-3" style="background:#a855f7" onclick="setZoneColor(3)" title="Violet"></div>
-      <div class="zone-color-dot"        id="zc-4" style="background:#f59e0b" onclick="setZoneColor(4)" title="Ambre"></div>
-      <div class="zone-color-dot"        id="zc-5" style="background:#e2e8f0" onclick="setZoneColor(5)" title="Blanc"></div>
+      <div class="zone-color-dot active" id="zc-0" style="background:#ef4444" data-act="setZoneColor" data-a='[0]' title="Rouge"></div>
+      <div class="zone-color-dot"        id="zc-1" style="background:#3b82f6" data-act="setZoneColor" data-a='[1]' title="Bleu"></div>
+      <div class="zone-color-dot"        id="zc-2" style="background:#22c55e" data-act="setZoneColor" data-a='[2]' title="Vert"></div>
+      <div class="zone-color-dot"        id="zc-3" style="background:#a855f7" data-act="setZoneColor" data-a='[3]' title="Violet"></div>
+      <div class="zone-color-dot"        id="zc-4" style="background:#f59e0b" data-act="setZoneColor" data-a='[4]' title="Ambre"></div>
+      <div class="zone-color-dot"        id="zc-5" style="background:#e2e8f0" data-act="setZoneColor" data-a='[5]' title="Blanc"></div>
       <div class="zone-sep"></div>
-      <button class="zone-clear-btn" onclick="clearAllZones()" title="Effacer toutes les zones">🗑 Effacer</button>
+      <button class="zone-clear-btn" data-act="clearAllZones" title="Effacer toutes les zones">🗑 Effacer</button>
     </div>
     <!-- Sous-toolbar dessin -->
     <div class="draw-subtoolbar" id="drawSubtoolbar" style="display:none;margin-top:.4rem;gap:.3rem;flex-wrap:wrap;justify-content:center;">
       <span style="font-size:.72rem;color:var(--text2);margin-right:.15rem;">Couleur :</span>
-      <button class="draw-color-btn" data-color="#f59e0b" onclick="setDrawColor('#f59e0b')" style="background:#f59e0b" title="Ambre"></button>
-      <button class="draw-color-btn" data-color="#ef4444" onclick="setDrawColor('#ef4444')" style="background:#ef4444" title="Rouge"></button>
-      <button class="draw-color-btn" data-color="#22c55e" onclick="setDrawColor('#22c55e')" style="background:#22c55e" title="Vert"></button>
-      <button class="draw-color-btn" data-color="#3b82f6" onclick="setDrawColor('#3b82f6')" style="background:#3b82f6" title="Bleu"></button>
-      <button class="draw-color-btn" data-color="#a855f7" onclick="setDrawColor('#a855f7')" style="background:#a855f7" title="Violet"></button>
-      <button class="draw-color-btn" data-color="#ffffff" onclick="setDrawColor('#ffffff')" style="background:#fff;border:1px solid #555" title="Blanc"></button>
-      <button class="draw-color-btn" data-color="#000000" onclick="setDrawColor('#000000')" style="background:#000;border:1px solid #555" title="Noir"></button>
+      <button class="draw-color-btn" data-color="#f59e0b" data-act="setDrawColor" data-a='["#f59e0b"]' style="background:#f59e0b" title="Ambre"></button>
+      <button class="draw-color-btn" data-color="#ef4444" data-act="setDrawColor" data-a='["#ef4444"]' style="background:#ef4444" title="Rouge"></button>
+      <button class="draw-color-btn" data-color="#22c55e" data-act="setDrawColor" data-a='["#22c55e"]' style="background:#22c55e" title="Vert"></button>
+      <button class="draw-color-btn" data-color="#3b82f6" data-act="setDrawColor" data-a='["#3b82f6"]' style="background:#3b82f6" title="Bleu"></button>
+      <button class="draw-color-btn" data-color="#a855f7" data-act="setDrawColor" data-a='["#a855f7"]' style="background:#a855f7" title="Violet"></button>
+      <button class="draw-color-btn" data-color="#ffffff" data-act="setDrawColor" data-a='["#ffffff"]' style="background:#fff;border:1px solid #555" title="Blanc"></button>
+      <button class="draw-color-btn" data-color="#000000" data-act="setDrawColor" data-a='["#000000"]' style="background:#000;border:1px solid #555" title="Noir"></button>
       <span style="font-size:.72rem;color:var(--text2);margin:0 .15rem 0 .4rem;">Trait :</span>
-      <input type="range" min="1" max="12" value="3" oninput="setDrawWidth(+this.value)" style="width:50px;vertical-align:middle;" title="Épaisseur"/>
-      <button class="tool-btn" onclick="undoLastStroke()" title="Annuler dernier trait (Ctrl+Z)" style="font-size:.65rem;padding:.2rem .4rem;">↩ Annuler</button>
-      <button class="tool-btn" onclick="if(confirm('Effacer tous les dessins ?'))clearAllStrokes()" title="Tout effacer" style="font-size:.65rem;padding:.2rem .4rem;color:var(--danger);">🗑 Tout</button>
+      <input type="range" min="1" max="12" value="3" data-act="setDrawWidth" data-a='["$numValue"]' style="width:50px;vertical-align:middle;" title="Épaisseur"/>
+      <button class="tool-btn" data-act="undoLastStroke" title="Annuler dernier trait (Ctrl+Z)" style="font-size:.65rem;padding:.2rem .4rem;">↩ Annuler</button>
+      <button class="tool-btn" data-act="confirmRun" data-a='['Effacer tous les dessins ?', "clearAllStrokes"]' title="Tout effacer" style="font-size:.65rem;padding:.2rem .4rem;color:var(--danger);">🗑 Tout</button>
     </div>
     <div class="map-info" id="mapInfo">Carte — 0,0</div>
 
@@ -1079,14 +1080,14 @@ body.table-mode .zone-subtoolbar{display:none !important;}
       <div class="ct-header">
         <span class="ct-title">⚔ Combat</span>
         <span class="ct-round" id="ctRound">R1</span>
-        <button class="ct-btn" onclick="combatPrev()" id="ctPrevBtn" title="Tour précédent">◀</button>
-        <button class="ct-btn" onclick="combatNext()" id="ctNextBtn" title="Tour suivant">▶</button>
-        <button class="ct-btn danger" onclick="openCombatSetup()" id="ctConfigBtn" title="Configurer" style="display:none">⚙</button>
-        <button class="ct-btn danger" onclick="endCombat()" id="ctEndBtn" title="Terminer le combat" style="display:none">✕</button>
+        <button class="ct-btn" data-act="combatPrev" id="ctPrevBtn" title="Tour précédent">◀</button>
+        <button class="ct-btn" data-act="combatNext" id="ctNextBtn" title="Tour suivant">▶</button>
+        <button class="ct-btn danger" data-act="openCombatSetup" id="ctConfigBtn" title="Configurer" style="display:none">⚙</button>
+        <button class="ct-btn danger" data-act="endCombat" id="ctEndBtn" title="Terminer le combat" style="display:none">✕</button>
       </div>
       <div class="ct-list" id="ctList"></div>
       <div class="ct-footer" id="ctFooter" style="display:none">
-        <button class="ct-add-btn" onclick="openAddCombatant()">＋ Ajouter un combattant</button>
+        <button class="ct-add-btn" data-act="openAddCombatant">＋ Ajouter un combattant</button>
       </div>
     </div>
 
@@ -1094,7 +1095,7 @@ body.table-mode .zone-subtoolbar{display:none !important;}
     <div class="audio-panel" id="audioPanel">
       <div class="audio-header">
         <span class="audio-title">🎵 Ambiance</span>
-        <button class="audio-btn" id="audioPanelClose" onclick="toggleAudioPanel()" title="Fermer">✕</button>
+        <button class="audio-btn" id="audioPanelClose" data-act="toggleAudioPanel" title="Fermer">✕</button>
       </div>
       <!-- Lecture en cours -->
       <div class="audio-now" id="audioNow">
@@ -1103,7 +1104,7 @@ body.table-mode .zone-subtoolbar{display:none !important;}
           <!-- EQ animé injecté par JS -->
         </div>
         <div class="audio-progress-row" id="audioProgressRow" style="display:none;">
-          <div class="audio-progress" id="audioProgressBar" onclick="audioSeek(event)" title="Cliquer pour avancer">
+          <div class="audio-progress" id="audioProgressBar" data-act="audioSeek" data-a='["$event"]' title="Cliquer pour avancer">
             <div class="audio-progress-bar" id="audioProgressFill" style="width:0%"></div>
           </div>
           <span class="audio-time" id="audioTimeDisplay">0:00 / 0:00</span>
@@ -1111,22 +1112,22 @@ body.table-mode .zone-subtoolbar{display:none !important;}
       </div>
       <!-- Contrôles MJ -->
       <div class="audio-controls" id="audioControls" style="display:none;">
-        <button class="audio-btn" id="audioPrevBtn" onclick="audioPlayPrev()" title="Précédent">⏮</button>
-        <button class="audio-btn" id="audioPlayBtn" onclick="audioPlayPause()" title="Lecture / Pause">▶</button>
-        <button class="audio-btn" id="audioNextBtn" onclick="audioPlayNext()" title="Suivant">⏭</button>
-        <button class="audio-btn" onclick="audioStop()" title="Stop">■</button>
-        <button class="audio-btn" id="audioLoopBtn" onclick="audioToggleLoop()" title="Boucle" style="font-size:.62rem;">🔁</button>
-        <button class="audio-btn" id="audioShuffleBtn" onclick="audioToggleShuffle()" title="Aléatoire" style="font-size:.62rem;">🔀</button>
+        <button class="audio-btn" id="audioPrevBtn" data-act="audioPlayPrev" title="Précédent">⏮</button>
+        <button class="audio-btn" id="audioPlayBtn" data-act="audioPlayPause" title="Lecture / Pause">▶</button>
+        <button class="audio-btn" id="audioNextBtn" data-act="audioPlayNext" title="Suivant">⏭</button>
+        <button class="audio-btn" data-act="audioStop" title="Stop">■</button>
+        <button class="audio-btn" id="audioLoopBtn" data-act="audioToggleLoop" title="Boucle" style="font-size:.62rem;">🔁</button>
+        <button class="audio-btn" id="audioShuffleBtn" data-act="audioToggleShuffle" title="Aléatoire" style="font-size:.62rem;">🔀</button>
         <div class="audio-vol">
           <span>🔊</span>
-          <input type="range" id="audioVolSlider" min="0" max="100" value="70" oninput="audioSetVolume(this.value)"/>
+          <input type="range" id="audioVolSlider" min="0" max="100" value="70" data-act="audioSetVolume" data-a='["$value"]'/>
           <span id="audioVolLabel">70</span>
         </div>
       </div>
       <!-- Crossfade (MJ) -->
       <div class="audio-xfade-row" id="audioCrossfadeRow" style="display:none;">
         <label>⟳ Fondu</label>
-        <input type="range" id="audioCrossfadeSlider" min="0" max="5" step="0.5" value="1.5" oninput="audioCrossfadeDuration=parseFloat(this.value);document.getElementById('audioCrossfadeVal').textContent=this.value+'s'"/>
+        <input type="range" id="audioCrossfadeSlider" min="0" max="5" step="0.5" value="1.5" data-act="setCrossfade"/>
         <span class="audio-xfade-val" id="audioCrossfadeVal">1.5s</span>
       </div>
       <!-- Volume joueur (affiché uniquement pour les joueurs, remplace toute la section MJ) -->
@@ -1144,7 +1145,7 @@ body.table-mode .zone-subtoolbar{display:none !important;}
         <div class="audio-player-vol">
           <div class="audio-player-vol-label">🔊 Volume local</div>
           <div class="audio-vol">
-            <input type="range" id="audioLocalVol" min="0" max="100" value="70" oninput="audioSetLocalVolume(this.value)" style="flex:1;accent-color:var(--accent2);cursor:pointer;height:4px;"/>
+            <input type="range" id="audioLocalVol" min="0" max="100" value="70" data-act="audioSetLocalVolume" data-a='["$value"]' style="flex:1;accent-color:var(--accent2);cursor:pointer;height:4px;"/>
             <span id="audioLocalVolLabel" style="font-size:.72rem;color:var(--text2);min-width:24px;text-align:right;">70</span>
           </div>
         </div>
@@ -1159,7 +1160,7 @@ body.table-mode .zone-subtoolbar{display:none !important;}
       </div>
       <!-- File d'attente (MJ) -->
       <div class="audio-queue" id="audioQueueSection" style="display:none;">
-        <div class="audio-queue-header" onclick="toggleQueueView()">
+        <div class="audio-queue-header" data-act="toggleQueueView">
           <span id="audioQueueLabel">File d'attente (0)</span>
           <span id="audioQueueToggleIcon">▾</span>
         </div>
@@ -1178,12 +1179,12 @@ body.table-mode .zone-subtoolbar{display:none !important;}
           📎 Uploader une piste audio
         </label>
         <input type="file" id="audio-file-input" accept="audio/*" style="display:none"
-          onchange="uploadAudioTrack(this)"/>
+          data-act="uploadAudioTrack" data-a='["$el"]'/>
       </div>
       <!-- Import par URL (MJ) -->
       <div class="audio-url-row" id="audioUrlRow" style="display:none;">
         <input class="audio-url-input" type="url" id="audioUrlInput" placeholder="URL d'une piste audio…"/>
-        <button class="audio-url-add-btn" onclick="addTrackByUrl()">＋</button>
+        <button class="audio-url-add-btn" data-act="addTrackByUrl">＋</button>
       </div>
       <!-- Playlists sauvegardées (MJ) -->
       <div class="audio-playlist-row" id="audioPlaylistRow" style="display:none;">
@@ -1195,7 +1196,7 @@ body.table-mode .zone-subtoolbar{display:none !important;}
     <div class="ini-banner" id="iniBanner">
       <div class="ini-banner-title">⚔ Lancez votre initiative !</div>
       <div id="iniBannerChars"></div>
-      <button class="ini-banner-submit" id="iniBannerSubmit" onclick="submitInitiatives()">Confirmer</button>
+      <button class="ini-banner-submit" id="iniBannerSubmit" data-act="submitInitiatives">Confirmer</button>
     </div>
   </div>
 
@@ -1204,9 +1205,9 @@ body.table-mode .zone-subtoolbar{display:none !important;}
     <div class="chat-header-row">
       <span class="chat-header-title">Chat de campagne</span>
       <div style="display:flex;gap:.3rem;">
-        <button class="journal-btn" id="lvlupPanelBtn" onclick="openLevelUpPanel()" title="Demandes de montée de niveau (MJ)" style="display:none">⬆ Niveaux<span class="lvlup-badge" id="lvlupBadge" style="display:none">0</span></button>
-        <button class="journal-btn" id="tablesBtn" onclick="openTablesModal()" title="Tables aléatoires (MJ)" style="display:none">🎲 Tables</button>
-        <button class="journal-btn" onclick="openJournal()" title="Journal de campagne (handouts)">
+        <button class="journal-btn" id="lvlupPanelBtn" data-act="openLevelUpPanel" title="Demandes de montée de niveau (MJ)" style="display:none">⬆ Niveaux<span class="lvlup-badge" id="lvlupBadge" style="display:none">0</span></button>
+        <button class="journal-btn" id="tablesBtn" data-act="openTablesModal" title="Tables aléatoires (MJ)" style="display:none">🎲 Tables</button>
+        <button class="journal-btn" data-act="openJournal" title="Journal de campagne (handouts)">
           📜 Journal
           <span class="journal-badge" id="journalBadge">!</span>
         </button>
@@ -1215,30 +1216,30 @@ body.table-mode .zone-subtoolbar{display:none !important;}
     <div class="chat-messages" id="chatMessages"></div>
     <!-- Barre de macros -->
     <div class="macro-bar" id="macroBar">
-      <button class="macro-edit-btn" onclick="openMacroModal()" title="Gérer les macros">⚙ Macros</button>
+      <button class="macro-edit-btn" data-act="openMacroModal" title="Gérer les macros">⚙ Macros</button>
     </div>
     <div class="chat-input-area">
       <div class="chat-input-row">
-        <textarea class="chat-input" id="chatInput" rows="2" placeholder="Message… · /w pseudo pour chuchoter" onkeydown="chatKeydown(event)"></textarea>
-        <button class="chat-send" onclick="sendChat()">➤</button>
+        <textarea class="chat-input" id="chatInput" rows="2" placeholder="Message… · /w pseudo pour chuchoter" data-act="chatKeydown" data-a='["$event"]'></textarea>
+        <button class="chat-send" data-act="sendChat">➤</button>
       </div>
     </div>
   </div>
 </div>
 
 <!-- Tables aléatoires -->
-<div class="tables-overlay" id="tablesOverlay" onclick="closeTablesModal(event)">
-  <div class="tables-modal" onclick="event.stopPropagation()">
+<div class="tables-overlay" id="tablesOverlay" data-act="closeTablesModal" data-a='["$event"]'>
+  <div class="tables-modal" data-stop>
     <div class="tables-topbar">
       <h3>🎲 Tables aléatoires</h3>
-      <button class="journal-new-btn" onclick="showTableEditor(null)">＋ Nouvelle table</button>
+      <button class="journal-new-btn" data-act="showTableEditor" data-a='[null]'>＋ Nouvelle table</button>
       <div style="position:relative;">
-        <button class="journal-new-btn" onclick="toggleImportMenu()" id="importMenuBtn">⬇ Importer ▾</button>
+        <button class="journal-new-btn" data-act="toggleImportMenu" id="importMenuBtn">⬇ Importer ▾</button>
         <div id="importMenu" style="display:none;position:absolute;right:0;top:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.3rem;z-index:10;width:200px;">
           <!-- rempli par JS -->
         </div>
       </div>
-      <button class="journal-close" onclick="closeTablesModal()">✕</button>
+      <button class="journal-close" data-act="closeTablesModal">✕</button>
     </div>
     <div class="tables-body">
       <div class="tables-list-col">
@@ -1254,13 +1255,13 @@ body.table-mode .zone-subtoolbar{display:none !important;}
 </div>
 
 <!-- Journal / Handouts -->
-<div class="journal-overlay" id="journalOverlay" onclick="closeJournal(event)">
-  <div class="journal-modal" onclick="event.stopPropagation()">
+<div class="journal-overlay" id="journalOverlay" data-act="closeJournal" data-a='["$event"]'>
+  <div class="journal-modal" data-stop>
     <div class="journal-topbar">
       <h3>📜 Journal de campagne</h3>
       <div style="display:flex;gap:.5rem;align-items:center;">
-        <button class="journal-new-btn" id="journalNewBtn" onclick="showHandoutForm(null)" style="display:none">＋ Nouveau</button>
-        <button class="journal-close" onclick="closeJournal()">✕</button>
+        <button class="journal-new-btn" id="journalNewBtn" data-act="showHandoutForm" data-a='[null]' style="display:none">＋ Nouveau</button>
+        <button class="journal-close" data-act="closeJournal">✕</button>
       </div>
     </div>
     <div class="journal-body">
@@ -1277,8 +1278,8 @@ body.table-mode .zone-subtoolbar{display:none !important;}
 </div>
 
 <!-- Modal macros -->
-<div class="macro-modal-overlay" id="macroModalOverlay" onclick="closeMacroModal(event)">
-  <div class="macro-modal" onclick="event.stopPropagation()">
+<div class="macro-modal-overlay" id="macroModalOverlay" data-act="closeMacroModal" data-a='["$event"]'>
+  <div class="macro-modal" data-stop>
     <h3>🎲 Mes macros</h3>
     <div id="macroListContainer" style="display:flex;flex-direction:column;gap:.4rem;"></div>
     <div class="macro-add-form">
@@ -1289,31 +1290,31 @@ body.table-mode .zone-subtoolbar{display:none !important;}
       </div>
       <div class="macro-color-row">
         <span style="font-size:.78rem;color:var(--text2);">Couleur :</span>
-        <div class="macro-color-pick active" id="mcp-0" style="background:#c9a227" onclick="selectMacroColor(0)"></div>
-        <div class="macro-color-pick"        id="mcp-1" style="background:#ef4444" onclick="selectMacroColor(1)"></div>
-        <div class="macro-color-pick"        id="mcp-2" style="background:#3b82f6" onclick="selectMacroColor(2)"></div>
-        <div class="macro-color-pick"        id="mcp-3" style="background:#22c55e" onclick="selectMacroColor(3)"></div>
-        <div class="macro-color-pick"        id="mcp-4" style="background:#a855f7" onclick="selectMacroColor(4)"></div>
-        <div class="macro-color-pick"        id="mcp-5" style="background:#e2e8f0" onclick="selectMacroColor(5)"></div>
+        <div class="macro-color-pick active" id="mcp-0" style="background:#c9a227" data-act="selectMacroColor" data-a='[0]'></div>
+        <div class="macro-color-pick"        id="mcp-1" style="background:#ef4444" data-act="selectMacroColor" data-a='[1]'></div>
+        <div class="macro-color-pick"        id="mcp-2" style="background:#3b82f6" data-act="selectMacroColor" data-a='[2]'></div>
+        <div class="macro-color-pick"        id="mcp-3" style="background:#22c55e" data-act="selectMacroColor" data-a='[3]'></div>
+        <div class="macro-color-pick"        id="mcp-4" style="background:#a855f7" data-act="selectMacroColor" data-a='[4]'></div>
+        <div class="macro-color-pick"        id="mcp-5" style="background:#e2e8f0" data-act="selectMacroColor" data-a='[5]'></div>
       </div>
-      <button class="btn-primary" onclick="addMacro()" style="width:100%;padding:.45rem;">＋ Ajouter</button>
+      <button class="btn-primary" data-act="addMacro" style="width:100%;padding:.45rem;">＋ Ajouter</button>
     </div>
   </div>
 </div>
 
 <!-- Intro vidéo overlay -->
 <div class="intro-overlay" id="introOverlay">
-  <div class="intro-backdrop" onclick="closeIntro()"></div>
+  <div class="intro-backdrop" data-act="closeIntro"></div>
   <div class="intro-card">
     <div class="intro-header">
       <span class="intro-title" id="introTitle">Bienvenue</span>
-      <button class="intro-close" onclick="closeIntro()">✕</button>
+      <button class="intro-close" data-act="closeIntro">✕</button>
     </div>
     <div class="intro-video-wrap" id="introVideoWrap">
                   <video id="introVideo" autoplay playsinline></video>
     </div>
     <div class="intro-footer">
-      <button class="btn btn-secondary" onclick="closeIntro()">Passer l'introduction</button>
+      <button class="btn btn-secondary" data-act="closeIntro">Passer l'introduction</button>
     </div>
   </div>
 </div>
@@ -1341,7 +1342,7 @@ body.table-mode .zone-subtoolbar{display:none !important;}
   <div class="token-creator">
     <div class="tc-head">
       <h3>🎨 Créateur de Token</h3>
-      <button type="button" class="btn-icon" onclick="closeTokenCreator()">✕</button>
+      <button type="button" class="btn-icon" data-act="closeTokenCreator">✕</button>
     </div>
     <div class="tc-body">
       <div class="tc-canvas-wrap">
@@ -1353,33 +1354,33 @@ body.table-mode .zone-subtoolbar{display:none !important;}
           <label>Image depuis URL</label>
           <div class="tc-row">
             <input type="url" id="tcUrlInput" placeholder="https://…" style="flex:1;"/>
-            <button class="btn-tc-load" onclick="tcLoadUrl()">Charger</button>
+            <button class="btn-tc-load" data-act="tcLoadUrl">Charger</button>
           </div>
         </div>
         <div class="tc-group">
           <label>Ou depuis un fichier</label>
-          <input type="file" id="tcFileInput" accept="image/*" style="font-size:.78rem;color:var(--text2);" onchange="tcLoadFile(event)"/>
+          <input type="file" id="tcFileInput" accept="image/*" style="font-size:.78rem;color:var(--text2);" data-act="tcLoadFile" data-a='["$event"]'/>
         </div>
         <div class="tc-group">
           <label>Bordure</label>
           <div class="tc-row">
-            <input type="color" class="tc-color-pick" id="tcBorderColor" value="#c9a227" oninput="tcRedraw()"/>
+            <input type="color" class="tc-color-pick" id="tcBorderColor" value="#c9a227" data-act="tcRedraw"/>
             <span style="font-size:.72rem;color:var(--text2);">Épaisseur</span>
-            <input type="number" id="tcBorderWidth" value="8" min="0" max="40" style="width:60px;" oninput="tcRedraw()"/>
+            <input type="number" id="tcBorderWidth" value="8" min="0" max="40" style="width:60px;" data-act="tcRedraw"/>
             <span style="font-size:.72rem;color:var(--text2);">px</span>
           </div>
         </div>
         <div class="tc-group">
           <label>Zoom</label>
-          <input type="range" id="tcZoom" min="0.2" max="5" step="0.05" value="1" oninput="tcRedraw()"/>
+          <input type="range" id="tcZoom" min="0.2" max="5" step="0.05" value="1" data-act="tcRedraw"/>
         </div>
         <p class="tc-hint">Faites glisser l'image pour la repositionner • Molette pour zoomer</p>
-        <button class="btn-tc-load" onclick="tcReset()" style="font-size:.75rem;padding:.25rem .5rem;margin-top:auto;">↺ Réinitialiser</button>
+        <button class="btn-tc-load" data-act="tcReset" style="font-size:.75rem;padding:.25rem .5rem;margin-top:auto;">↺ Réinitialiser</button>
       </div>
     </div>
     <div class="tc-foot">
-      <button type="button" class="btn btn-secondary" onclick="closeTokenCreator()">Annuler</button>
-      <button type="button" class="btn btn-primary" onclick="tcApply()">✔ Utiliser ce token</button>
+      <button type="button" class="btn btn-secondary" data-act="closeTokenCreator">Annuler</button>
+      <button type="button" class="btn btn-primary" data-act="tcApply">✔ Utiliser ce token</button>
     </div>
   </div>
 </div>
@@ -1388,14 +1389,14 @@ body.table-mode .zone-subtoolbar{display:none !important;}
 <div class="modal-overlay" id="modal-token">
   <div class="modal">
     <h3>Placer un Token</h3>
-    <form onsubmit="doPlaceToken(event)">
+    <form data-act="doPlaceToken" data-a='["$event"]'>
       <div class="form-group">
         <label>Lier à un personnage</label>
-        <select id="tk-char" onchange="onTkCharChange()"><option value="">— NPC / Libre —</option></select>
+        <select id="tk-char" data-act="onTkCharChange"><option value="">— NPC / Libre —</option></select>
       </div>
       <!-- Champs NPC (visibles uniquement si pas de personnage lié) -->
       <div id="tk-npc-fields">
-        <button type="button" class="btn-npc-lib" onclick="openNpcLib()">📚 Choisir dans la bibliothèque D&D 5e</button>
+        <button type="button" class="btn-npc-lib" data-act="openNpcLib">📚 Choisir dans la bibliothèque D&D 5e</button>
         <div class="form-group">
           <label>Label</label>
           <input type="text" id="tk-label" placeholder="Gobelin A" maxlength="50"/>
@@ -1409,7 +1410,7 @@ body.table-mode .zone-subtoolbar{display:none !important;}
             <label>Image (URL)</label>
             <div style="display:flex;gap:.4rem;align-items:center;">
               <input type="url" id="tk-image" placeholder="https://…" style="flex:1;"/>
-              <button type="button" title="Créateur de token" onclick="openTokenCreator('tk-image')" style="padding:.3rem .5rem;background:rgba(201,162,39,.12);border:1px solid var(--accent);color:var(--accent);border-radius:6px;cursor:pointer;font-size:.78rem;flex-shrink:0;">🎨</button>
+              <button type="button" title="Créateur de token" data-act="openTokenCreator" data-a='["tk-image"]' style="padding:.3rem .5rem;background:rgba(201,162,39,.12);border:1px solid var(--accent);color:var(--accent);border-radius:6px;cursor:pointer;font-size:.78rem;flex-shrink:0;">🎨</button>
             </div>
           </div>
         </div>
@@ -1429,7 +1430,7 @@ body.table-mode .zone-subtoolbar{display:none !important;}
         </div>
       </div>
       <div class="modal-actions">
-        <button type="button" class="btn btn-secondary" onclick="closeTokenModal()">Annuler</button>
+        <button type="button" class="btn btn-secondary" data-act="closeTokenModal">Annuler</button>
         <button type="submit" class="btn btn-primary">Placer</button>
       </div>
     </form>
@@ -1441,8 +1442,8 @@ body.table-mode .zone-subtoolbar{display:none !important;}
   <div class="modal">
     <h3>📚 Bibliothèque PNJ — D&D 5e</h3>
     <div class="npc-lib-filters">
-      <input type="search" id="npcSearch" placeholder="🔍 Rechercher…" oninput="filterNpcLib()"/>
-      <select id="npcFilterCR" onchange="filterNpcLib()">
+      <input type="search" id="npcSearch" placeholder="🔍 Rechercher…" data-act="filterNpcLib"/>
+      <select id="npcFilterCR" data-act="filterNpcLib">
         <option value="">Tous les CR</option>
         <option value="0">CR 0</option>
         <option value="0.125">CR 1/8</option>
@@ -1457,7 +1458,7 @@ body.table-mode .zone-subtoolbar{display:none !important;}
         <option value="9">CR 9–12</option>
         <option value="13">CR 13+</option>
       </select>
-      <select id="npcFilterType" onchange="filterNpcLib()">
+      <select id="npcFilterType" data-act="filterNpcLib">
         <option value="">Tous types</option>
         <option value="Humanoïde">Humanoïde</option>
         <option value="Mort-vivant">Mort-vivant</option>
@@ -1477,7 +1478,7 @@ body.table-mode .zone-subtoolbar{display:none !important;}
     </div>
     <div class="npc-grid" id="npcGrid"></div>
     <div class="modal-actions" style="margin-top:.7rem;">
-      <button type="button" class="btn btn-secondary" onclick="closeNpcLib()">Fermer</button>
+      <button type="button" class="btn btn-secondary" data-act="closeNpcLib">Fermer</button>
     </div>
   </div>
 </div>
@@ -1487,32 +1488,32 @@ body.table-mode .zone-subtoolbar{display:none !important;}
   <div class="cond-title" id="condMenuTitle">Statut du token</div>
   <!-- HP rapide -->
   <div id="condHpRow" style="display:none;align-items:center;gap:.4rem;margin-bottom:.5rem;">
-    <button class="cond-btn" style="flex:0;padding:.25rem .5rem;font-size:1rem;" onclick="quickHpDelta(-1)">−</button>
+    <button class="cond-btn" style="flex:0;padding:.25rem .5rem;font-size:1rem;" data-act="quickHpDelta" data-a='[-1]'>−</button>
     <div style="flex:1;text-align:center;">
       <input id="condHpInput" type="number" min="0"
         style="width:52px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:.25rem .4rem;border-radius:6px;font-size:.9rem;font-weight:600;text-align:center;"
-        onchange="quickHpSet(this.value)" onclick="event.stopPropagation()"/>
+        data-act="quickHpSet" data-a='["$value"]' data-stop/>
       <span id="condHpMax" style="font-size:.75rem;color:var(--text2);"> / —</span>
     </div>
-    <button class="cond-btn" style="flex:0;padding:.25rem .5rem;font-size:1rem;" onclick="quickHpDelta(+1)">＋</button>
+    <button class="cond-btn" style="flex:0;padding:.25rem .5rem;font-size:1rem;" data-act="quickHpDelta" data-a='[1]'>＋</button>
   </div>
   <div class="cond-title">Conditions</div>
   <div class="cond-grid" id="condGrid"></div>
   <hr class="cond-sep"/>
-  <button class="cond-delete" id="combatAttackBtn" style="display:none;color:#ef4444;border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.08);" onclick="openCombatAttack()">⚔ Attaquer ce token</button>
-  <button class="cond-btn" id="targetBtn" style="display:none;margin-top:.3rem;" onclick="setTarget()">🎯 Cibler ce token</button>
+  <button class="cond-delete" id="combatAttackBtn" style="display:none;color:#ef4444;border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.08);" data-act="openCombatAttack">⚔ Attaquer ce token</button>
+  <button class="cond-btn" id="targetBtn" style="display:none;margin-top:.3rem;" data-act="setTarget">🎯 Cibler ce token</button>
   <hr class="cond-sep" id="combatSep" style="display:none;margin:.2rem 0;"/>
   <!-- Section MJ : réassigner + supprimer -->
   <div id="condGmSection" style="display:none;">
     <hr class="cond-sep" style="margin:.4rem 0;"/>
     <div class="cond-title">Joueur propriétaire</div>
     <div class="assign-row">
-      <select class="assign-select" id="assignPlayerSelect" onchange="reassignTokenOwner(this.value)">
+      <select class="assign-select" id="assignPlayerSelect" data-act="reassignTokenOwner" data-a='["$value"]'>
         <option value="">— Aucun joueur —</option>
       </select>
     </div>
     <hr class="cond-sep" style="margin:.4rem 0;"/>
-    <button class="cond-delete" onclick="deleteSelectedToken()">🗑 Supprimer le token</button>
+    <button class="cond-delete" data-act="deleteSelectedToken">🗑 Supprimer le token</button>
   </div>
 </div>
 
@@ -1521,7 +1522,7 @@ body.table-mode .zone-subtoolbar{display:none !important;}
   <div class="combat-modal">
     <div class="combat-header">
       <span class="combat-title">⚔ Résolution d'attaque</span>
-      <button onclick="closeCombatAttack()" style="background:none;border:none;color:var(--text2);font-size:1.2rem;cursor:pointer;line-height:1;">✕</button>
+      <button data-act="closeCombatAttack" style="background:none;border:none;color:var(--text2);font-size:1.2rem;cursor:pointer;line-height:1;">✕</button>
     </div>
     <div class="combat-combatants">
       <div class="combat-combatant">
@@ -1537,7 +1538,7 @@ body.table-mode .zone-subtoolbar{display:none !important;}
         </div>
       </div>
     </div>
-    <select class="atk-select-row" id="combatAtkSelect" onchange="onCombatAtkSelect()">
+    <select class="atk-select-row" id="combatAtkSelect" data-act="onCombatAtkSelect">
       <option value="_manual">— Attaque manuelle —</option>
     </select>
     <div class="atk-manual" id="combatManual">
@@ -1546,7 +1547,7 @@ body.table-mode .zone-subtoolbar{display:none !important;}
       <div><label>Dégâts</label><input type="text" id="combatDmgFormula" value="1d6" placeholder="2d6+3"/></div>
       <div><label>Type</label><input type="text" id="combatDmgType" value="" placeholder="tranchant"/></div>
     </div>
-    <button class="combat-roll-btn" onclick="rollCombatAttack()">🎲 Lancer l'attaque</button>
+    <button class="combat-roll-btn" data-act="rollCombatAttack">🎲 Lancer l'attaque</button>
     <div class="combat-result" id="combatResult"></div>
   </div>
 </div>
@@ -1564,8 +1565,8 @@ body.table-mode .zone-subtoolbar{display:none !important;}
       <input type="number" id="newmap-grid" value="50" min="20" max="200"/>
     </div>
     <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="document.getElementById('modal-newmap').classList.remove('open')">Annuler</button>
-      <button class="btn btn-primary" onclick="createNewMap()">Créer</button>
+      <button class="btn btn-secondary" data-act="removeClassById" data-a='["modal-newmap", "open"]'>Annuler</button>
+      <button class="btn btn-primary" data-act="createNewMap">Créer</button>
     </div>
   </div>
 </div>
@@ -1586,10 +1587,10 @@ body.table-mode .zone-subtoolbar{display:none !important;}
       <div class="form-group">
         <label style="display:block;font-size:.75rem;color:var(--text2);margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.05em;">Image personnalisée</label>
         <div class="upload-field" style="margin-bottom:.6rem;">
-          <input type="url" id="bg-url" placeholder="https://… ou téléverser…" oninput="onBgUrlChange()"/>
+          <input type="url" id="bg-url" placeholder="https://… ou téléverser…" data-act="onBgUrlChange"/>
           <label class="upload-file-btn" for="bg-file" title="Téléverser">📎</label>
           <input type="file" id="bg-file" accept="image/*" style="display:none"
-            onchange="uploadImageGame(this,'bg-url', () => onBgUrlChange())"/>
+            data-act="uploadImageGame" data-a='["$el", "bg-url", "$cb:onBgUrlChange"]'/>
         </div>
       </div>
 
@@ -1610,7 +1611,7 @@ body.table-mode .zone-subtoolbar{display:none !important;}
               <label style="font-size:.78rem;color:var(--text2);">Colonnes (largeur)</label>
               <span id="bg-cols-val" style="font-size:.82rem;color:var(--text);font-weight:600;">20</span>
             </div>
-            <input type="range" id="bg-cols-slider" min="2" max="100" value="20" style="width:100%;accent-color:var(--accent);" oninput="updateBgCalib()"/>
+            <input type="range" id="bg-cols-slider" min="2" max="100" value="20" style="width:100%;accent-color:var(--accent);" data-act="updateBgCalib"/>
           </div>
 
           <!-- Infos calculées -->
@@ -1638,8 +1639,8 @@ body.table-mode .zone-subtoolbar{display:none !important;}
 
     </div>
     <div class="modal-actions" style="padding-top:.8rem;border-top:1px solid var(--border);margin-top:.3rem;">
-      <button class="btn btn-secondary" onclick="closeBgModal()">Annuler</button>
-      <button class="btn btn-primary" onclick="applyMapBg()">Appliquer</button>
+      <button class="btn btn-secondary" data-act="closeBgModal">Annuler</button>
+      <button class="btn btn-primary" data-act="applyMapBg">Appliquer</button>
     </div>
   </div>
 </div>
@@ -1649,7 +1650,7 @@ body.table-mode .zone-subtoolbar{display:none !important;}
   <div class="modal-combat">
     <div class="mc2-head">
       <h3>⚔ Lancer le combat</h3>
-      <button class="modal-char-close" onclick="closeCombatModal()">✕</button>
+      <button class="modal-char-close" data-act="closeCombatModal">✕</button>
     </div>
     <div class="mc2-body">
       <p style="font-size:.8rem;color:var(--text2);margin-bottom:1rem;line-height:1.5;">
@@ -1659,12 +1660,12 @@ body.table-mode .zone-subtoolbar{display:none !important;}
       <div class="mc2-section">
         <div class="mc2-label">Ennemis / PNJ</div>
         <div id="mc2-enemies"></div>
-        <button class="ct-add-btn" style="margin-top:.3rem" onclick="addEnemyRow()">＋ Ajouter un ennemi</button>
+        <button class="ct-add-btn" style="margin-top:.3rem" data-act="addEnemyRow">＋ Ajouter un ennemi</button>
       </div>
     </div>
     <div class="mc2-footer">
-      <button class="btn btn-cancel-char" style="flex:1;padding:.6rem;border:none;border-radius:7px;cursor:pointer;font-size:.875rem;font-weight:500;background:var(--surface2);border:1px solid var(--border);color:var(--text);" onclick="closeCombatModal()">Annuler</button>
-      <button class="btn btn-save" style="flex:2;padding:.6rem;border:none;border-radius:7px;cursor:pointer;font-size:.875rem;font-weight:500;background:linear-gradient(135deg,var(--accent),#a07c18);color:#0e0e14;" onclick="startCombat()">⚔ Lancer le combat</button>
+      <button class="btn btn-cancel-char" style="flex:1;padding:.6rem;border:none;border-radius:7px;cursor:pointer;font-size:.875rem;font-weight:500;background:var(--surface2);border:1px solid var(--border);color:var(--text);" data-act="closeCombatModal">Annuler</button>
+      <button class="btn btn-save" style="flex:2;padding:.6rem;border:none;border-radius:7px;cursor:pointer;font-size:.875rem;font-weight:500;background:linear-gradient(135deg,var(--accent),#a07c18);color:#0e0e14;" data-act="startCombat">⚔ Lancer le combat</button>
     </div>
   </div>
 </div>
@@ -1674,7 +1675,7 @@ body.table-mode .zone-subtoolbar{display:none !important;}
   <div class="modal-combat" style="max-width:340px;">
     <div class="mc2-head">
       <h3>Ajouter un combattant</h3>
-      <button class="modal-char-close" onclick="document.getElementById('modal-add-combatant').classList.remove('open')">✕</button>
+      <button class="modal-char-close" data-act="removeClassById" data-a='["modal-add-combatant", "open"]'>✕</button>
     </div>
     <div class="mc2-body">
       <div class="fg"><label>Nom</label><input type="text" id="ac-name" placeholder="Gobelin B"/></div>
@@ -1685,8 +1686,8 @@ body.table-mode .zone-subtoolbar{display:none !important;}
       <div class="fg"><label>Couleur</label><input type="color" id="ac-color" value="#ef4444" style="height:36px;cursor:pointer;padding:.2rem;"/></div>
     </div>
     <div class="mc2-footer">
-      <button class="btn btn-cancel-char" style="flex:1;padding:.6rem;border:none;border-radius:7px;cursor:pointer;background:var(--surface2);border:1px solid var(--border);color:var(--text);" onclick="document.getElementById('modal-add-combatant').classList.remove('open')">Annuler</button>
-      <button class="btn btn-save" style="flex:1;padding:.6rem;border:none;border-radius:7px;cursor:pointer;background:linear-gradient(135deg,var(--accent),#a07c18);color:#0e0e14;" onclick="doAddCombatant()">Ajouter</button>
+      <button class="btn btn-cancel-char" style="flex:1;padding:.6rem;border:none;border-radius:7px;cursor:pointer;background:var(--surface2);border:1px solid var(--border);color:var(--text);" data-act="removeClassById" data-a='["modal-add-combatant", "open"]'>Annuler</button>
+      <button class="btn btn-save" style="flex:1;padding:.6rem;border:none;border-radius:7px;cursor:pointer;background:linear-gradient(135deg,var(--accent),#a07c18);color:#0e0e14;" data-act="doAddCombatant">Ajouter</button>
     </div>
   </div>
 </div>
@@ -1696,17 +1697,17 @@ body.table-mode .zone-subtoolbar{display:none !important;}
   <div class="modal-char">
     <div class="modal-char-head">
       <h3 id="mcs-title">Fiche de personnage <span class="pf2e-badge pf2e-only">Pathfinder 2e</span></h3>
-      <button class="modal-char-close" onclick="closeCharSheetModal()">✕</button>
+      <button class="modal-char-close" data-act="closeCharSheetModal">✕</button>
     </div>
     <div class="modal-char-tabs">
-      <div class="mct active" onclick="switchMCTab(0)">Identité</div>
-      <div class="mct" onclick="switchMCTab(1)">Caract.</div>
-      <div class="mct" id="mct-skills" onclick="switchMCTab(2)">Compétences</div>
-      <div class="mct" onclick="switchMCTab(3)">Inventaire</div>
-      <div class="mct" onclick="switchMCTab(4)">Sorts</div>
-      <div class="mct" onclick="switchMCTab(5)">Notes</div>
-      <div class="mct" onclick="switchMCTab(6)">⚡ Capacités</div>
-      <div class="mct" id="mct-gm" onclick="switchMCTab(7)" style="display:none;color:var(--accent2);">🛡 MJ</div>
+      <div class="mct active" data-act="switchMCTab" data-a='[0]'>Identité</div>
+      <div class="mct" data-act="switchMCTab" data-a='[1]'>Caract.</div>
+      <div class="mct" id="mct-skills" data-act="switchMCTab" data-a='[2]'>Compétences</div>
+      <div class="mct" data-act="switchMCTab" data-a='[3]'>Inventaire</div>
+      <div class="mct" data-act="switchMCTab" data-a='[4]'>Sorts</div>
+      <div class="mct" data-act="switchMCTab" data-a='[5]'>Notes</div>
+      <div class="mct" data-act="switchMCTab" data-a='[6]'>⚡ Capacités</div>
+      <div class="mct" id="mct-gm" data-act="switchMCTab" data-a='[7]' style="display:none;color:var(--accent2);">🛡 MJ</div>
     </div>
     <div class="modal-char-body">
       <div class="mc-alert" id="mcs-alert"></div>
@@ -1715,17 +1716,17 @@ body.table-mode .zone-subtoolbar{display:none !important;}
       <div class="mc-panel active" id="mcp-0">
         <div class="fg-row" style="grid-template-columns:1fr 1fr;">
           <div class="fg"><label>Nom</label><input type="text" id="mcs-name" maxlength="100" placeholder="Aragorn"/></div>
-          <div class="fg"><label>Niveau</label><div style="display:flex;align-items:center;gap:.3rem;"><input type="number" id="mcs-level" min="1" max="20" value="1" style="flex:1"/><button class="lvlup-btn" id="lvlupRequestBtn" onclick="openLevelUpRequestModal()" title="Demander une montée de niveau au MJ" style="display:none">+</button></div></div>
+          <div class="fg"><label>Niveau</label><div style="display:flex;align-items:center;gap:.3rem;"><input type="number" id="mcs-level" min="1" max="20" value="1" style="flex:1"/><button class="lvlup-btn" id="lvlupRequestBtn" data-act="openLevelUpRequestModal" title="Demander une montée de niveau au MJ" style="display:none">+</button></div></div>
         </div>
         <div class="fg-row" style="grid-template-columns:1fr 1fr;">
           <div class="fg">
             <label id="mcs-race-label">Race</label>
-            <select id="mcs-race-sel" onchange="onComboSel('race')"></select>
+            <select id="mcs-race-sel" data-act="onComboSel" data-a='["race"]'></select>
             <input type="text" id="mcs-race" class="combo-custom" style="display:none" maxlength="50" placeholder="Saisir une race…"/>
           </div>
           <div class="fg">
             <label>Classe</label>
-            <select id="mcs-class-sel" onchange="onComboSel('class')"></select>
+            <select id="mcs-class-sel" data-act="onComboSel" data-a='["class"]'></select>
             <input type="text" id="mcs-class" class="combo-custom" style="display:none" maxlength="50" placeholder="Saisir une classe…"/>
           </div>
         </div>
@@ -1736,12 +1737,12 @@ body.table-mode .zone-subtoolbar{display:none !important;}
         <div class="fg">
           <label>Portrait</label>
           <div class="portrait-row">
-            <img id="mcs-portrait-preview" class="portrait-preview" src="" onerror="this.style.display='none'" alt=""/>
+            <img id="mcs-portrait-preview" class="portrait-preview" src="" data-act="hideSelf" alt=""/>
             <div class="upload-field">
-              <input type="url" id="mcs-portrait" placeholder="URL ou téléverser…" oninput="updatePortraitPreview()"/>
+              <input type="url" id="mcs-portrait" placeholder="URL ou téléverser…" data-act="updatePortraitPreview"/>
               <label class="upload-file-btn" for="mcs-portrait-file" title="Téléverser">📎</label>
               <input type="file" id="mcs-portrait-file" accept="image/*" style="display:none"
-                onchange="uploadImageGame(this,'mcs-portrait',updatePortraitPreview)"/>
+                data-act="uploadImageGame" data-a='["$el", "mcs-portrait", "$fn:updatePortraitPreview"]'/>
             </div>
           </div>
         </div>
@@ -1749,7 +1750,7 @@ body.table-mode .zone-subtoolbar{display:none !important;}
           <div class="fg"><label id="mcs-bg-label">Background / Alignement</label><input type="text" id="mcs-background" maxlength="100" placeholder="Noble, Loyal Bon"/></div>
           <div class="fg">
             <label>Sous-classe / Archétype</label>
-            <select id="mcs-subclass-sel" onchange="onComboSel('subclass')"></select>
+            <select id="mcs-subclass-sel" data-act="onComboSel" data-a='["subclass"]'></select>
             <input type="text" id="mcs-subclass" class="combo-custom" style="display:none" maxlength="80" placeholder="Saisir une sous-classe…"/>
           </div>
         </div>
@@ -1779,7 +1780,7 @@ body.table-mode .zone-subtoolbar{display:none !important;}
               </div>
               <div class="fg" style="max-width:120px;margin:0;">
                 <label>Maîtrise classe</label>
-                <select id="mcs-pf2e-class-prof" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:.3rem .5rem;border-radius:6px;font-size:.8rem;" onchange="updatePF2eClassDC()">
+                <select id="mcs-pf2e-class-prof" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:.3rem .5rem;border-radius:6px;font-size:.8rem;" data-act="updatePF2eClassDC">
                   <option value="0">Inexpérimenté</option>
                   <option value="2">Entraîné</option>
                   <option value="4">Expert</option>
@@ -1837,7 +1838,7 @@ body.table-mode .zone-subtoolbar{display:none !important;}
         <!-- Attaques -->
         <div class="inv-header" style="margin-bottom:.25rem;">
           <span style="font-size:.85rem;font-weight:600;color:var(--text);">⚔ Attaques</span>
-          <button class="btn-add-item" style="width:auto;padding:.25rem .7rem;" onclick="addAttackRow()">＋</button>
+          <button class="btn-add-item" style="width:auto;padding:.25rem .7rem;" data-act="addAttackRow">＋</button>
         </div>
         <div class="atk-header"><span>Nom</span><span>Bonus</span><span>Dégâts</span><span>Type</span><span></span></div>
         <div class="atk-list" id="mcs-attacks"></div>
@@ -1850,8 +1851,8 @@ body.table-mode .zone-subtoolbar{display:none !important;}
         <div class="inv-header">
           <span style="font-size:.82rem;color:var(--text2);">Objets & équipement</span>
           <div style="display:flex;gap:.4rem;">
-            <button class="btn-add-item" style="width:auto;padding:.25rem .7rem;" onclick="openItemPicker()">🗡 Choisir</button>
-            <button class="btn-add-item" style="width:auto;padding:.25rem .7rem;" onclick="addItemRow()">＋ Ajouter</button>
+            <button class="btn-add-item" style="width:auto;padding:.25rem .7rem;" data-act="openItemPicker">🗡 Choisir</button>
+            <button class="btn-add-item" style="width:auto;padding:.25rem .7rem;" data-act="addItemRow">＋ Ajouter</button>
           </div>
         </div>
         <div class="item-list" id="mcs-items"></div>
@@ -1863,7 +1864,7 @@ body.table-mode .zone-subtoolbar{display:none !important;}
         <div class="slots-grid" id="mcs-slots"></div>
         <div class="inv-header" style="margin-top:.8rem;">
           <span style="font-size:.82rem;color:var(--text2);">Sorts connus</span>
-          <button class="btn-add-item" style="width:auto;padding:.25rem .7rem;" onclick="openSpellPicker()">✨ Choisir</button>
+          <button class="btn-add-item" style="width:auto;padding:.25rem .7rem;" data-act="openSpellPicker">✨ Choisir</button>
         </div>
         <div class="item-list" id="mcs-spells"></div>
       </div>
@@ -1877,7 +1878,7 @@ body.table-mode .zone-subtoolbar{display:none !important;}
       <div class="mc-panel" id="mcp-6">
         <div class="inv-header" style="margin-bottom:.5rem;">
           <span style="font-size:.85rem;font-weight:600;color:var(--text);">⚡ Capacités de classe</span>
-          <button class="btn-add-item" style="width:auto;padding:.25rem .7rem;" onclick="addCapRow()">＋</button>
+          <button class="btn-add-item" style="width:auto;padding:.25rem .7rem;" data-act="addCapRow">＋</button>
         </div>
         <div class="cap-list" id="mcs-caps"></div>
       </div>
@@ -1893,7 +1894,7 @@ body.table-mode .zone-subtoolbar{display:none !important;}
           <div class="fg-row" style="grid-template-columns:1fr 1fr;">
             <div class="fg">
               <label>Portée de vision (cases)</label>
-              <input type="number" id="mcs-vision-radius" min="0" max="30" value="0" placeholder="0 = illimitée" oninput="updateVisionMeter()"/>
+              <input type="number" id="mcs-vision-radius" min="0" max="30" value="0" placeholder="0 = illimitée" data-act="updateVisionMeter"/>
               <div class="vision-meter-hint" id="visionMeterHint">0 case = illimitée</div>
               <div style="font-size:.68rem;color:var(--text2);margin-top:.1rem;">1 case = 1,5 m · 0 = illimitée</div>
             </div>
@@ -1916,8 +1917,8 @@ body.table-mode .zone-subtoolbar{display:none !important;}
       </div>
     </div>
     <div class="modal-char-footer">
-      <button class="btn btn-cancel-char" onclick="closeCharSheetModal()">Annuler</button>
-      <button class="btn btn-save" id="mcs-save-btn" onclick="saveCharSheet()">💾 Sauvegarder</button>
+      <button class="btn btn-cancel-char" data-act="closeCharSheetModal">Annuler</button>
+      <button class="btn btn-save" id="mcs-save-btn" data-act="saveCharSheet">💾 Sauvegarder</button>
     </div>
   </div>
 </div>
@@ -1954,397 +1955,18 @@ body.table-mode .zone-subtoolbar{display:none !important;}
 <script src="/js/game/item-picker.js?v=1"></script>
 <script src="/js/game/gm-tools.js?v=1"></script>
 <script src="/js/game/socket-listeners.js?v=1"></script>
-<script>
-// ── State ────────────────────────────────────────────────────
-const params = new URLSearchParams(location.search);
-const CAMPAIGN_ID = params.get('campaign');
-const DISPLAY_MODE = params.get('mode') === 'display';
-const TABLE_MODE = params.get('table') === '1';
-let socket, campaign, myChars = [], myRole = 'player';
-let activeChar = null;
-let onlineUsers = {};
-let allCampaignMembers = [];
-let hpDisplay = { pc_mode: 'bar', npc_mode: 'none', threshold_high: 70, threshold_low: 30 };
-
-// ── Mode affichage central ──
-if (DISPLAY_MODE) document.body.classList.add('display-mode');
-if (TABLE_MODE) document.body.classList.add('table-mode');
-
-// ── Ciblage (global, accessible par drawTargetLines) ──
-const campaignTargets = []; // { from_token_id, to_token_id, to_token_name, player_id, player_name, revealed }
-let myTargets = [];
-
-// ── Mode table : écran tactile verrouillé ──
-let tableLocked = TABLE_MODE;
-
-function unlockTable() {
-  if (tableLocked && confirm('Déverrouiller l\'écran tactile ? Attention : les figurines sur l\'écran peuvent déclencher des actions.')) {
-    tableLocked = false;
-    updateTableUI();
-  }
-}
-
-function lockTable() {
-  tableLocked = true;
-  updateTableUI();
-}
-
-function updateTableUI() {
-  const overlay = document.getElementById('tableOverlay');
-  if (!overlay) return;
-  overlay.classList.toggle('visible', tableLocked);
-  const lockInfo = document.getElementById('tableLockInfo');
-  if (lockInfo) {
-    lockInfo.className = 'lock-info' + (tableLocked ? '' : ' unlocked');
-    lockInfo.innerHTML = tableLocked ? '🔒 Verrouillé' : '🔓 Déverrouillé';
-  }
-}
-
-// Créer et injecter l'overlay table (appelé après loadCampaign)
-function initTableOverlay() {
-  if (!TABLE_MODE) return;
-  const div = document.createElement('div');
-  div.id = 'tableOverlay';
-  div.className = 'visible';
-  const cName = (campaign && campaign.name) || 'Partie en cours';
-  div.innerHTML = `
-    <div class="lock-info" id="tableLockInfo">🔒 Verrouillé</div>
-    <div class="qr-wrap">
-      <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(location.origin + '/lobby.html')}" alt="QR code" loading="lazy"/>
-      <div class="qr-label">Scannez pour rejoindre</div>
-    </div>
-    <div class="to-bottom">
-      <span class="camp-name">${cName}</span>
-      <span>·</span>
-      <span id="tableOnlineCount">0 en ligne</span>
-      <button class="tool-btn" onclick="unlockTable()" style="font-size:.7rem;padding:.15rem .5rem;" title="Déverrouiller l'écran">🔓 Déverrouiller</button>
-      <button class="tool-btn" onclick="lockTable()" style="font-size:.7rem;padding:.15rem .5rem;" title="Verrouiller">🔒</button>
-      <a class="tool-btn" href="${location.origin + '/game.html?campaign=' + CAMPAIGN_ID + '&mode=display'}" style="font-size:.7rem;padding:.15rem .5rem;text-decoration:none;">↻ Reconnecter</a>
-    </div>
-  `;
-  document.body.appendChild(div);
-}
-
-function updateTableOnlineCount() {
-  const el = document.getElementById('tableOnlineCount');
-  if (el) el.textContent = Object.keys(onlineUsers).length + ' en ligne';
-}
-
-// ── Vidéo d'introduction ─────────────────────────────────────
-const INTRO_SEEN_KEY = 'rpg_intro_seen_';
-
-function showIntroVideo(videoUrl, title) {
-  const overlay = document.getElementById('introOverlay');
-  const video = document.getElementById('introVideo');
-  const titleEl = document.getElementById('introTitle');
-  if (!overlay || !video) return;
-  titleEl.textContent = title || 'Introduction';
-  video.src = videoUrl;
-  video.muted = false;
-  video.load();
-  overlay.style.display = 'flex';
-  // Tenter la lecture avec son — si bloqué par le navigateur, forcer le mute
-  const playPromise = video.play();
-  if (playPromise) {
-    playPromise.catch(() => {
-      video.muted = true;
-      video.play().catch(() => {});
-      // Ajouter un bouton pour activer le son
-      const footer = overlay.querySelector('.intro-footer');
-      if (footer && !document.getElementById('introUnmuteBtn')) {
-        const btn = document.createElement('button');
-        btn.id = 'introUnmuteBtn';
-        btn.className = 'btn btn-secondary';
-        btn.textContent = '🔇 Activer le son';
-        btn.onclick = () => { video.muted = !video.muted; btn.textContent = video.muted ? '🔇 Activer le son' : '🔊 Son activé'; };
-        footer.insertBefore(btn, footer.firstChild);
-      }
-    });
-  }
-  video.onended = () => { closeIntro(); };
-}
-
-function closeIntro() {
-  const overlay = document.getElementById('introOverlay');
-  const video = document.getElementById('introVideo');
-  if (overlay) overlay.style.display = 'none';
-  if (video) { video.pause(); video.muted = false; video.src = ''; }
-  const unmuteBtn = document.getElementById('introUnmuteBtn');
-  if (unmuteBtn) unmuteBtn.remove();
-}
-
-function checkAndShowIntro() {
-  const sys = campaign?.system;
-  if (!sys) return;
-  const videoUrl = SYSTEM_INTRO_VIDEOS[sys] || SYSTEM_INTRO_VIDEOS[SYSTEM_ALIASES[sys]];
-  if (!videoUrl) return;
-  const key = INTRO_SEEN_KEY + CAMPAIGN_ID;
-  // Si le paramètre intro=1 est présent, on force l'affichage même si déjà vu
-  const forceIntro = params.get('intro') === '1';
-  if (!forceIntro && localStorage.getItem(key)) return;
-  // Vérifier que la vidéo existe
-  fetch(videoUrl, { method: 'HEAD' }).then(r => {
-    if (r.ok) {
-      localStorage.setItem(key, '1');
-      showIntroVideo(videoUrl, sys + ' — Introduction');
-    }
-  }).catch(() => {});
-}
-
-// ── Auth guard ───────────────────────────────────────────────
-(async () => {
-  if (!CAMPAIGN_ID) { window.location.href = '/lobby.html'; return; }
-  const token = getToken();
-  if (!token) { window.location.href = '/'; return; }
-  try {
-    const user = await API.auth.me();
-    setUser(user);
-    await loadCampaign();
-    connectSocket();
-    // Vérifier la vidéo d'intro après chargement
-    setTimeout(checkAndShowIntro, 1500);
-  } catch { clearToken(); window.location.href = '/'; }
-})();
-
-async function loadCampaign() {
-  campaign = await API.campaigns.get(CAMPAIGN_ID);
-  myRole = campaign.role;
-  document.getElementById('campTitle').textContent = campaign.name;
-  const badge = document.getElementById('roleBadge');
-  badge.textContent = myRole === 'gm' ? '👑 MJ' : '⚔ Joueur';
-  badge.className = `badge badge-${myRole}`;
-  if (myRole === 'gm') {
-    document.getElementById('btnAddToken').style.display = '';
-    const settingsBtn = document.getElementById('btnSettings');
-    settingsBtn.style.display = '';
-    settingsBtn.href = `/campaign-settings.html?campaign=${CAMPAIGN_ID}`;
-    document.getElementById('tool-bg').style.display = '';
-    document.getElementById('weatherBtn').style.display = '';
-    document.getElementById('nightModeBtn').style.display = '';
-  }
-
-  if (myRole === 'gm') {
-    document.getElementById('sectionMaps').style.display = '';
-    document.getElementById('tool-fog').style.display = '';
-    document.getElementById('tool-walls').style.display = '';
-    document.getElementById('tool-objects').style.display = '';
-    document.getElementById('mct-gm').style.display = '';
-    loadMaps();
-  }
-
-  allCampaignMembers = campaign.members || [];
-  myChars = campaign.characters.filter(c => myRole === 'gm' || c.user_id === getUser().id);
-  populateCharSelectors();
-
-  // ── Mode map unique : les joueurs ne voient pas la carte ──
-  const displayMode = campaign.settings?.display_mode || 'normal';
-  if (displayMode === 'map_unique' && !DISPLAY_MODE) {
-    if (myRole === 'gm') {
-      // Le MJ voit la carte normalement + lien vers l'écran central
-      const displayUrl = `${location.origin}${location.pathname}?campaign=${CAMPAIGN_ID}&mode=display`;
-      const header = document.querySelector('header');
-      const link = document.createElement('a');
-      link.className = 'btn-icon';
-      link.href = displayUrl;
-      link.target = '_blank';
-      link.title = 'Ouvrir l\'écran central (carte seule)';
-      link.textContent = '🖥 Carte';
-      link.style.background = 'rgba(201,162,39,.15)';
-      link.style.borderColor = 'var(--accent)';
-      link.style.color = 'var(--accent)';
-      // Insérer avant le bouton "← Lobby"
-      const lobbyBtn = header.querySelector('button:last-of-type') || header.lastElementChild;
-      header.insertBefore(link, lobbyBtn);
-    } else {
-      // Les joueurs n'ont pas la carte : masquer la zone carte
-      const mapArea = document.getElementById('mapArea');
-      if (mapArea) mapArea.style.display = 'none';
-      // Les sidebars gardent leur largeur d'origine (280px)
-      // L'espace du milieu reste vide
-    }
-  }
-
-  if (DISPLAY_MODE) {
-    // Mode écran central : pas besoin des sidebars ni du chargement des personnages
-    document.querySelector('.sidebar-left')?.remove();
-    document.querySelector('.sidebar-right')?.remove();
-    // Mode table : afficher l'overlay verrouillé
-    if (TABLE_MODE) initTableOverlay();
-    initCanvas();
-    // Ne pas appeler connectSocket() ici — ce sera fait après loadCampaign()
-    return;
-  }
-
-  initCanvas();
-  loadMacros();
-  loadHandouts();
-  if (myRole === 'gm') {
-    const tb = document.getElementById('tablesBtn');
-    if (tb) tb.style.display = '';
-    loadTables();
-    const lvlBtn = document.getElementById('lvlupPanelBtn');
-    if (lvlBtn) lvlBtn.style.display = '';
-  }
-  // Le bouton "+" de montée de niveau s'affiche à l'ouverture de la fiche (openCharSheet)
-}
-
-function populateCharSelectors() {
-  const opts = myChars.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
-  const sel = document.getElementById('charSelector');
-  const prev = sel.value;
-  sel.innerHTML = `<option value="">— Aucun personnage —</option>` + opts;
-  if (prev) sel.value = prev;
-  // Remplir le modal token
-  const tk = document.getElementById('tk-char');
-  tk.innerHTML = '<option value="">— NPC / Libre —</option>' + campaign.characters.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
-}
-
-function selectChar(id) {
-  activeChar = myChars.find(c => c.id === id) || null;
-  const info = document.getElementById('charInfo');
-  if (!activeChar) { info.style.display = 'none'; return; }
-  info.style.display = '';
-  document.getElementById('charName').textContent = activeChar.name;
-  document.getElementById('charSub').textContent = `${activeChar.race||''} ${activeChar.class||''}`.trim() || '—';
-  document.getElementById('hpCurrent').value = activeChar.hp_current;
-  document.getElementById('hpMax').textContent = activeChar.hp_max;
-  document.getElementById('charAC').textContent = activeChar.ac;
-  document.getElementById('charLevel').textContent = activeChar.level;
-  updateHPBar();
-  renderCharSidebarStats(); // also calls updateEncumbranceStat
-}
-
-// ── Portrait stats tooltip ────────────────────────────────────
-
-// (code déplacé dans /js/game/char-sidebar.js — outils de la fiche : tooltips, jets rapides, sorts)
-
-// ── Socket.io ────────────────────────────────────────────────
-
-// (code déplacé dans /js/game/socket-events.js — connexion + événements socket)
-
-// ── Chat ─────────────────────────────────────────────────────
-
-// (code déplacé dans /js/game/chat.js — chat + tables aléatoires)
-
-// ── Dés ──────────────────────────────────────────────────────
-
-// (code déplacé dans /js/game/dice.js — dés 2D et 3D (Three.js))
-
-// ── Canvas / Carte ────────────────────────────────────────────
-let canvas, ctx, currentMap = null, gameTokens = [];
-let cam = { x: 0, y: 0, zoom: 1 };
-let drag = { active: false, startX: 0, startY: 0, camX: 0, camY: 0 };
-let selectedToken = null, draggingToken = false;
-let currentTool = 'select';
-let drawStrokes = [], drawCurrentStroke = null, drawColor = '#f59e0b', drawWidth = 3;
-let showGrid = true;
-
-// ── Zones de sorts ─────────────────────────────────────────────
-
-// (code déplacé dans /js/game/map-extras.js — zones de sorts, objets, optimisation)
-
-// ── Cache images tokens ───────────────────────────────────────
-
-// (code déplacé dans /js/game/token-render.js — cache des images de tokens)
-
-// ── Grille ────────────────────────────────────────────────────
-
-// (code déplacé dans /js/game/map-render.js — grille + dessin des tokens)
-
-// ── Affichage PV sur les tokens ───────────────────────────────
-
-// (code déplacé dans /js/game/map-overlays.js — PV, pings, son de tour, dessin, ciblage)
-
-// ── Interactions souris ───────────────────────────────────────
-
-// (code déplacé dans /js/game/map-interactions.js — interactions souris (jetons, caméra))
-
-// ── Outils ───────────────────────────────────────────────────
-
-// (code déplacé dans /js/game/map-tools.js — outils de la carte (murs, lumières, brouillard…))
-
-// ── Historique des déplacements (Ctrl+Z) ─────────────────────
-
-// (code déplacé dans /js/game/shortcuts.js — raccourcis clavier + Ctrl+Z)
-
-// ── Créateur de Token ─────────────────────────────────────────
-
-// (code déplacé dans /js/game/token-creator.js — créateur + placement de token)
-
-// ── Bibliothèque PNJ D&D 5e ───────────────────────────────────
-
-// (code déplacé dans /js/game/npc-library.js — PNJ D&D 5e (CR 0 → 20+))
-
-// ── Combo-select helpers ──────────────────────────────────────────
-
-// (code déplacé dans /js/game/combo-select.js — listes déroulantes de la fiche)
-
-// ── Encombrement D&D 5e ──────────────────────────────────────
-
-// (code déplacé dans /js/game/sheet-rules.js — encombrement, vision, capacités, PF2e)
-
-// ── Persistance ──────────────────────────────────────────────
-function saveWalls() {
-  if (!currentMap) return;
-  _invalidateVisionAll(); // murs changés → recalcul polygones de vision
-  socket?.emit('walls_save', { campaign_id: CAMPAIGN_ID, map_id: currentMap.id, walls: mapWalls });
-}
-function saveLights() {
-  if (!currentMap) return;
-  socket?.emit('lights_save', { campaign_id: CAMPAIGN_ID, map_id: currentMap.id, lights: mapLights });
-}
-
-// ── Rendu murs ───────────────────────────────────────────────
-
-// (code déplacé dans /js/game/map-walls.js — murs (ligne de vue) et murs d'objets)
-
-// ── Rendu lumières ───────────────────────────────────────────
-
-// (code déplacé dans /js/game/map-lighting.js — lumières, éclairage dynamique, mode nuit)
-
-// ── Utilitaire géométrique ────────────────────────────────────
-
-// (code déplacé dans /js/game/map-vision.js — géométrie des rayons + brouillard de guerre)
-
-// ── Dropdown Vision ──────────────────────────────────────────
-
-// (code déplacé dans /js/game/map-settings.js — réglages de carte, vision, import UVTT)
-
-// ── Ambiances procédurales (Web Audio API) ────────────────────
-
-// (code déplacé dans /js/game/audio-player.js — audio (ambiances, queue, playlists))
-
-// ── Cartes prédéfinies ────────────────────────────────────────
-
-// (code déplacé dans /js/game/map-presets.js — cartes prédéfinies + fonds de carte)
-
-// ── Toggle visibilité du tracker ──────────────────────────────
-
-// (code déplacé dans /js/game/combat-tracker.js — traqueur de combat + initiative)
-
-// ── Item Picker ──────────────────────────────────────────────
-
-// (code déplacé dans /js/game/item-picker.js — modale de sélection d'objets)
-
-// ── Tables D&D 5e (frontend) ─────────────────────────────────
-
-// (code déplacé dans /js/game/gm-tools.js — tables D&D 5e (frontend) + panneau GM)
-
-// ── Toast ────────────────────────────────────────────────────
-
-// (code déplacé dans /js/game/socket-listeners.js — toast + derniers événements temps réel)
-
-</script>
+<script src="/js/game/core.js?v=1"></script>
+  <script src="/js/csp-registry.js?v=1"></script>
 
 <!-- ══════════════════════════════════════════════════════ -->
 <!-- SPELL PICKER MODAL                                      -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="spell-picker-overlay" id="spellPickerOverlay" onclick="if(event.target===this)closeSpellPicker()">
+<div class="spell-picker-overlay" id="spellPickerOverlay" data-act="closeSpellPicker" data-self>
   <div class="spell-picker">
     <div class="sp-head">
       <h3>✨ Choisir un sort</h3>
-      <input class="sp-search" id="spSearch" type="text" placeholder="Rechercher un sort…" oninput="filterSpells()" autocomplete="off"/>
-      <button class="modal-char-close" onclick="closeSpellPicker()">✕</button>
+      <input class="sp-search" id="spSearch" type="text" placeholder="Rechercher un sort…" data-act="filterSpells" autocomplete="off"/>
+      <button class="modal-char-close" data-act="closeSpellPicker">✕</button>
     </div>
     <div class="sp-filters" id="spFilters"></div>
     <div class="sp-list" id="spList"></div>
@@ -2352,7 +1974,7 @@ function saveLights() {
       <span style="font-size:.75rem;color:var(--text2);white-space:nowrap">Créer manuellement :</span>
       <input class="sp-manual" id="spManualName" type="text" placeholder="Nom du sort" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:.38rem .55rem;border-radius:6px;font-size:.83rem;outline:none;"/>
       <input class="sp-manual sp-manual-lvl" id="spManualLvl" type="number" min="0" max="9" value="1" style="width:52px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:.38rem .45rem;border-radius:6px;font-size:.83rem;outline:none;text-align:center;"/>
-      <button class="btn-add-item" style="width:auto;padding:.3rem .7rem;white-space:nowrap" onclick="addSpellManual()">＋ Ajouter</button>
+      <button class="btn-add-item" style="width:auto;padding:.3rem .7rem;white-space:nowrap" data-act="addSpellManual">＋ Ajouter</button>
     </div>
   </div>
 </div>
@@ -2360,35 +1982,35 @@ function saveLights() {
 <!-- ══════════════════════════════════════════════════════ -->
 <!-- ITEM PICKER MODAL                                       -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="item-picker-overlay" id="itemPickerOverlay" onclick="if(event.target===this)closeItemPicker()">
+<div class="item-picker-overlay" id="itemPickerOverlay" data-act="closeItemPicker" data-self>
   <div class="item-picker">
     <div class="sp-head">
       <h3>🗡 Choisir un objet</h3>
-      <input class="sp-search" id="ipSearch" type="text" placeholder="Rechercher un objet magique…" oninput="filterItems()" autocomplete="off"/>
-      <button class="modal-char-close" onclick="closeItemPicker()">✕</button>
+      <input class="sp-search" id="ipSearch" type="text" placeholder="Rechercher un objet magique…" data-act="filterItems" autocomplete="off"/>
+      <button class="modal-char-close" data-act="closeItemPicker">✕</button>
     </div>
     <div class="sp-filters" id="ipFilters"></div>
     <div class="sp-list" id="ipList"></div>
     <div class="sp-manual">
       <span style="font-size:.75rem;color:var(--text2);white-space:nowrap">Saisie manuelle :</span>
-      <input id="ipManualName" type="text" placeholder="Nom de l'objet" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:.38rem .55rem;border-radius:6px;font-size:.83rem;outline:none;" onkeydown="if(event.key==='Enter')addItemManual()"/>
-      <button class="btn-add-item" style="width:auto;padding:.3rem .7rem;white-space:nowrap" onclick="addItemManual()">＋ Ajouter</button>
+      <input id="ipManualName" type="text" placeholder="Nom de l'objet" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:.38rem .55rem;border-radius:6px;font-size:.83rem;outline:none;" data-act="addItemManual" data-key="Enter"/>
+      <button class="btn-add-item" style="width:auto;padding:.3rem .7rem;white-space:nowrap" data-act="addItemManual">＋ Ajouter</button>
     </div>
   </div>
 </div>
 <!-- ══════════════════════════════════════════════════════ -->
 <!-- UPCAST MODAL                                            -->
 <!-- ══════════════════════════════════════════════════════ -->
-<div class="upcast-overlay" id="upcastOverlay" onclick="if(event.target===this)closeUpcastModal()">
+<div class="upcast-overlay" id="upcastOverlay" data-act="closeUpcastModal" data-self>
   <div class="upcast-modal">
     <div class="upcast-head"><h3 id="upcastTitle"></h3><p id="upcastDesc"></p></div>
     <div class="upcast-slots" id="upcastSlots"></div>
-    <div class="upcast-footer"><button class="upcast-cancel" onclick="closeUpcastModal()">Annuler</button></div>
+    <div class="upcast-footer"><button class="upcast-cancel" data-act="closeUpcastModal">Annuler</button></div>
   </div>
 </div>
 
 <!-- ── Modale demande de montée de niveau (joueur) ── -->
-<div class="lvlup-overlay" id="lvlupRequestOverlay" style="display:none" onclick="if(event.target===this)closeLevelUpRequestModal()">
+<div class="lvlup-overlay" id="lvlupRequestOverlay" style="display:none" data-act="closeLevelUpRequestModal" data-self>
   <div class="lvlup-box">
     <div class="lvlup-title">⬆ Montée de niveau</div>
     <div class="lvlup-sub" id="lvlupReqSub">Demander une montée de niveau au MJ</div>
@@ -2399,28 +2021,28 @@ function saveLights() {
     </div>
     <div style="font-size:.78rem;color:var(--text2);text-align:center;margin-bottom:.7rem">Comment calculer les PV gagnés ?</div>
     <div class="lvlup-hp-choice">
-      <button class="lvlup-hp-btn selected" id="lvlupBtnAvg" onclick="selectLvlupMethod('average')">
+      <button class="lvlup-hp-btn selected" id="lvlupBtnAvg" data-act="selectLvlupMethod" data-a='["average"]'>
         📊 Moyenne<br><span id="lvlupAvgVal" style="font-size:.95rem;font-weight:700;color:var(--accent2);">+5</span> PV
       </button>
-      <button class="lvlup-hp-btn" id="lvlupBtnRoll" onclick="selectLvlupMethod('roll')">
+      <button class="lvlup-hp-btn" id="lvlupBtnRoll" data-act="selectLvlupMethod" data-a='["roll"]'>
         🎲 Lancer le dé<br><span id="lvlupDieLabel" style="font-size:.88rem;color:var(--text2);">d8</span>
       </button>
     </div>
     <div class="lvlup-die-result" id="lvlupDieResult"></div>
     <div class="lvlup-hp-preview" id="lvlupHpPreview"></div>
     <div class="lvlup-actions">
-      <button class="btn" style="background:none;border:1px solid var(--border);" onclick="closeLevelUpRequestModal()">Annuler</button>
-      <button class="btn btn-save" id="lvlupConfirmBtn" onclick="submitLevelUpRequest()">Envoyer la demande</button>
+      <button class="btn" style="background:none;border:1px solid var(--border);" data-act="closeLevelUpRequestModal">Annuler</button>
+      <button class="btn btn-save" id="lvlupConfirmBtn" data-act="submitLevelUpRequest">Envoyer la demande</button>
     </div>
   </div>
 </div>
 
 <!-- ── Panneau approbation MJ ── -->
-<div class="lvlup-overlay" id="lvlupPanelOverlay" style="display:none" onclick="if(event.target===this)closeLevelUpPanel()">
+<div class="lvlup-overlay" id="lvlupPanelOverlay" style="display:none" data-act="closeLevelUpPanel" data-self>
   <div class="lvlup-panel">
     <div class="lvlup-panel-title">
       <span>⬆ Demandes de montée de niveau</span>
-      <button style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:1.1rem;" onclick="closeLevelUpPanel()">✕</button>
+      <button style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:1.1rem;" data-act="closeLevelUpPanel">✕</button>
     </div>
     <div id="lvlupPanelList"></div>
   </div>

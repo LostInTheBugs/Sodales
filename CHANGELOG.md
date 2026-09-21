@@ -2,6 +2,14 @@
 
 All notable changes to Sodales are documented in this file.
 
+## 2026.09.012 (2026-09-21)
+
+### Security — Content-Security-Policy enforced (no more unsafe-inline for scripts)
+- Removed every inline event handler (360 attributes across 9 pages and the JS modules) in favour of event delegation: `data-act` / `data-a` attributes handled by a single engine (`js/csp-actions.js`) with an explicit action registry (`js/csp-registry.js`, 224 actions).
+- Moved the 9 inline `<script>` blocks out of the pages into `js/page/*.js` and `js/game/core.js` — no page ships inline JavaScript anymore.
+- CSP switched from Report-Only to enforced: `script-src 'self' https://cdn.socket.io https://cdnjs.cloudflare.com` (no `unsafe-inline`, no `unsafe-eval`).
+- Verified in a real browser: 9 pages, 0 violations, 0 JS errors, dice rolls / panels / character sheet / forms all exercised under the blocking policy.
+
 ## 2026.09.011 (2026-09-21)
 
 ### Refactor — game.html modularization (step 4, final)

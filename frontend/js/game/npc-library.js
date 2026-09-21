@@ -199,7 +199,7 @@ function renderNpcGrid() {
   grid.innerHTML = npcLibFiltered.map((n, i) => {
     const color = NPC_TYPE_COLOR[n.type] || '#c9a227';
     const icon  = n.icon || NPC_TYPE_ICON[n.type] || '👤';
-    return `<div class="npc-card" onclick="selectNpcFromLib(${i})">
+    return `<div class="npc-card" data-act="selectNpcFromLib" data-a='[${i}]'>
       <div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.3rem;">
         <div class="npc-card-icon" style="background:${color}22;font-size:1rem;width:28px;height:28px;min-width:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;">${icon}</div>
         <div>

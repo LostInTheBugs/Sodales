@@ -169,7 +169,7 @@ function openCharSheetModal() {
     const mod = Math.floor((val - 10) / 2);
     return `<div class="stat-edit-box">
       <label>${s.label}</label>
-      <input type="number" id="mcs-stat-${s.key}" min="1" max="30" value="${val}" oninput="updateStatMod('${s.key}')"/>
+      <input type="number" id="mcs-stat-${s.key}" min="1" max="30" value="${val}" data-act="updateStatMod" data-a='["${s.key}"]'/>
       <div class="stat-mod" id="mcs-mod-${s.key}">${mod>=0?'+':''}${mod}</div>
     </div>`;
   }).join('');
@@ -213,7 +213,7 @@ function openCharSheetModal() {
   slotsEl.innerHTML = [1,2,3,4,5,6,7,8,9].map(lvl => {
     const maxVal = (spells.slots||{})[lvl] || 0;
     const usedVal = (spells.slots_used||{})[lvl] || 0;
-    return `<div class="slot-box" title="Clic long pour reset les utilisés" ondblclick="document.getElementById('mcs-slot-used-${lvl}').value=0">
+    return `<div class="slot-box" title="Clic long pour reset les utilisés" data-act="setValueById" data-a='["mcs-slot-used-${lvl}", 0]'>
       <label>Niv. ${lvl}</label>
       <div class="slot-box-inputs">
         <input type="number" id="mcs-slot-used-${lvl}" min="0" max="9" value="${usedVal}" title="Emplacements utilisés" style="color:var(--danger)"/>

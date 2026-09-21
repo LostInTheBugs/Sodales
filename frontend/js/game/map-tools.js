@@ -257,7 +257,7 @@ function showHotkeys() {
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.4rem 1.8rem;max-width:480px;width:90%;max-height:80vh;overflow-y:auto;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
         <h3 style="font-family:Cinzel,serif;color:var(--accent);font-size:1rem;">Raccourcis clavier</h3>
-        <button onclick="document.getElementById('hotkeyOverlay').classList.remove('open')" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:1.1rem;">✕</button>
+        <button data-act="removeClassById" data-a='["hotkeyOverlay", "open"]' style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:1.1rem;">✕</button>
       </div>
       <table style="width:100%;border-collapse:collapse;font-size:.83rem;">
         ${[

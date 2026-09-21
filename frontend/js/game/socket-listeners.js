@@ -127,9 +127,9 @@ function populateMCSSpells(char) {
     const usedVal = (spells.slots_used||{})[lvl] || 0;
     return `<div class="slot-box"><label>Niv ${lvl}</label>
       <div class="slot-box-inputs">
-        <input type="number" min="0" max="${maxVal}" value="${usedVal}" data-slot-used="${lvl}" onchange="onSlotChange(this,${lvl},'used')"/>
+        <input type="number" min="0" max="${maxVal}" value="${usedVal}" data-slot-used="${lvl}" data-act="onSlotChange" data-a='["$el", ${lvl}, "used"]'/>
         <span>/</span>
-        <input type="number" min="0" max="9" value="${maxVal}" data-slot-max="${lvl}" onchange="onSlotChange(this,${lvl},'max')"/>
+        <input type="number" min="0" max="9" value="${maxVal}" data-slot-max="${lvl}" data-act="onSlotChange" data-a='["$el", ${lvl}, "max"]'/>
       </div></div>`;
   }).join('');
 }

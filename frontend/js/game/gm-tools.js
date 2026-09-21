@@ -127,8 +127,8 @@ function renderLevelUpPanel(requests) {
       </div>
       <div class="lvlup-card-actions">
         <textarea placeholder="Raison du refus (optionnel)" id="lvlreject-${r.id}"></textarea>
-        <button class="btn-approve" onclick="resolveLevel('${r.id}', true)">✓ Approuver</button>
-        <button class="btn-reject"  onclick="resolveLevel('${r.id}', false)">✗ Refuser</button>
+        <button class="btn-approve" data-act="resolveLevel" data-a='["${r.id}", true]'>✓ Approuver</button>
+        <button class="btn-reject"  data-act="resolveLevel" data-a='["${r.id}", false]'>✗ Refuser</button>
       </div>
     </div>`;
   }).join('');

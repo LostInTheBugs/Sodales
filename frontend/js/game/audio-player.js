@@ -381,7 +381,7 @@ function renderQueue() {
     <div class="audio-queue-item${i === audioQueueIdx ? ' current' : ''}">
       <span style="font-size:.7rem;width:14px;text-align:center;color:var(--text2);">${i + 1}</span>
       <span class="audio-queue-item-name" title="${esc(t.name)}">${i === audioQueueIdx ? '▶ ' : ''}${esc(t.name)}</span>
-      <button class="audio-queue-del" onclick="removeFromQueue(${i})" title="Retirer">✕</button>
+      <button class="audio-queue-del" data-act="removeFromQueue" data-a='[${i}]' title="Retirer">✕</button>
     </div>`).join('');
 }
 
@@ -501,6 +501,16 @@ function audioFadeOut(duration, callback) {
 }
 
 // ── Lecteur audio fichier ─────────────────────────────────────
+ACT.selectAudioTrackRow = (url, name, ev) => {
+  if (!ev.target.closest('.audio-track-add,.audio-track-del')) selectAudioTrack('file', null, url, name);
+};
+ACT.renameCustomTrackGm = (idx) => { if (myRole === 'gm') renameCustomTrack(idx); };
+ACT.setCrossfade = function () {
+  audioCrossfadeDuration = parseFloat(this.value);
+  const t = document.getElementById('audioCrossfadeVal');
+  if (t) t.textContent = this.value + 's';
+};
+ACT.queueFromEl = (el, ev) => { queueAudioTrack('file', null, el.dataset.url, el.dataset.name, ev); };
 function ensureAudioEl() {
   if (!audioFileEl) {
     audioFileEl = document.createElement('audio');
@@ -822,11 +832,11 @@ function renderCustomTracks() {
     const safeUrl = t.url.replace(/'/g, "\\'");
     const safeName = t.name.replace(/'/g, "\\'");
     const gmBtns = myRole === 'gm' ? `
-      <button class="audio-track-add" onclick="queueAudioTrack('file',null,'${safeUrl}','${safeName}',event)" title="Ajouter à la file">＋</button>
-      <button class="audio-track-del" onclick="deleteCustomTrack(${idx},event)" title="Supprimer">🗑</button>` : '';
+      <button class="audio-track-add" data-act="queueFromEl" data-url="${safeUrl}" data-name="${safeName}" title="Ajouter à la file">＋</button>
+      <button class="audio-track-del" data-act="deleteCustomTrack" data-a='[${idx}, "$event"]' title="Supprimer">🗑</button>` : '';
     return `<div class="audio-track-row" data-id="${esc(t.url)}"
-      onclick="if(!event.target.closest('.audio-track-add,.audio-track-del'))selectAudioTrack('file',null,'${safeUrl}','${safeName}')"
-      ondblclick="if(myRole==='gm')renameCustomTrack(${idx})">
+      data-act="selectAudioTrackRow" data-url="${safeUrl}" data-name="${safeName}"
+      data-act="renameCustomTrackGm" data-a='[${idx}]'>
       <span class="audio-track-icon">🎵</span>
       <span class="audio-track-name" title="Double-clic pour renommer">${esc(t.name)}</span>
       ${gmBtns}
@@ -848,7 +858,7 @@ function buildAudioTrackList() {
     div.dataset.id = p.id;
     div.title = p.desc;
     const addBtn = myRole === 'gm'
-      ? `<button class="audio-track-add" onclick="queueAudioTrack('preset','${p.id}',null,'${p.icon} ${p.name}',event)" title="Ajouter à la file">＋</button>`
+      ? `<button class="audio-track-add" data-act="queueAudioTrack" data-a='["preset", "${p.id}", null, "${p.icon} ${p.name}", "$event"]' title="Ajouter à la file">＋</button>`
       : '';
     div.innerHTML = `<span class="audio-track-icon">${p.icon}</span><span class="audio-track-name">${p.name}</span>${addBtn}`;
     if (myRole === 'gm') {
@@ -869,7 +879,7 @@ function buildAudioTrackList() {
     div.dataset.id = t.url;
     const tname = `${t.icon} ${t.name}`;
     const addBtn = myRole === 'gm'
-      ? `<button class="audio-track-add" onclick="queueAudioTrack('file',null,'${t.url}','${tname.replace(/'/g,"\\'")}',event)" title="Ajouter à la file">＋</button>`
+      ? `<button class="audio-track-add" data-act="queueFromEl" data-url="${t.url}" data-name="${tname.replace(/&/g,'&amp;').replace(/"/g,'&quot;')}"\\'")}',event)" title="Ajouter à la file">＋</button>`
       : '';
     div.innerHTML = `<span class="audio-track-icon">${t.icon}</span><span class="audio-track-name">${t.name}</span>${addBtn}`;
     if (myRole === 'gm') {
@@ -939,9 +949,9 @@ function renderSavedPlaylists() {
   for (let i = 0; i < MAX_PLAYLISTS; i++) {
     const pl = playlists[i] || null;
     html += `<div class="audio-playlist-slot">
-      <button class="audio-pl-btn ${pl ? 'filled' : ''}" onclick="${pl ? `loadPlaylist(${i})` : `saveCurrentPlaylist(${i})`}" title="${pl ? `▶ ${pl.name} (${pl.tracks.length} pistes)` : 'Sauvegarder la file courante'}">${pl ? esc(pl.name.substring(0,8)) : `PL${i+1}`}</button>
-      <button class="audio-pl-save-btn" onclick="saveCurrentPlaylist(${i})" title="Sauvegarder la file courante ici">💾</button>
-      ${pl ? `<button class="audio-pl-del-btn" onclick="deletePlaylist(${i},event)" title="Supprimer">✕</button>` : ''}
+      <button class="audio-pl-btn ${pl ? 'filled' : ''}" data-act="${pl ? 'loadPlaylist' : 'saveCurrentPlaylist'}" data-a="[${i}]" title="${pl ? `▶ ${pl.name} (${pl.tracks.length} pistes)` : 'Sauvegarder la file courante'}">${pl ? esc(pl.name.substring(0,8)) : `PL${i+1}`}</button>
+      <button class="audio-pl-save-btn" data-act="saveCurrentPlaylist" data-a='[${i}]' title="Sauvegarder la file courante ici">💾</button>
+      ${pl ? `<button class="audio-pl-del-btn" data-act="deletePlaylist" data-a='[${i}, "$event"]' title="Supprimer">✕</button>` : ''}
     </div>`;
   }
   row.innerHTML = html;

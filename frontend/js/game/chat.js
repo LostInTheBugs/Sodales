@@ -184,7 +184,7 @@ function renderTablesList() {
     return;
   }
   el.innerHTML = randomTables.map(t => `
-    <div class="table-item ${activeTableId === t.id ? 'active' : ''}" onclick="selectTable('${t.id}')">
+    <div class="table-item ${activeTableId === t.id ? 'active' : ''}" data-act="selectTable" data-a='["${t.id}"]'>
       <div class="table-item-name">${esc(t.name)}</div>
       <div class="table-item-count">${t.entries.length} entrée${t.entries.length > 1 ? 's' : ''}</div>
     </div>
@@ -204,8 +204,8 @@ function showTableDetail(t) {
   detail.innerHTML = `
     <div class="tables-detail-header">
       <div class="tables-detail-name">${esc(t.name)}</div>
-      <button class="journal-new-btn" onclick="showTableEditor('${t.id}')">✏ Modifier</button>
-      <button class="journal-new-btn" onclick="deleteTable('${t.id}')" style="border-color:var(--danger);color:var(--danger);">🗑</button>
+      <button class="journal-new-btn" data-act="showTableEditor" data-a='["${t.id}"]'>✏ Modifier</button>
+      <button class="journal-new-btn" data-act="deleteTable" data-a='["${t.id}"]' style="border-color:var(--danger);color:var(--danger);">🗑</button>
     </div>
     <div class="tables-entries" id="tableEntriesView">
       ${t.entries.map(e => `
@@ -217,8 +217,8 @@ function showTableDetail(t) {
     </div>
     <div class="table-roll-result">
       <div class="table-roll-output" id="tableRollOutput">Appuie sur Rouler…</div>
-      <button class="journal-new-btn" onclick="rollTablePrivate('${t.id}')" title="Résultat visible uniquement par toi">👁 Privé</button>
-      <button class="btn-primary" onclick="rollTablePublic('${t.id}')" style="padding:.35rem .8rem;">🎲 Rouler</button>
+      <button class="journal-new-btn" data-act="rollTablePrivate" data-a='["${t.id}"]' title="Résultat visible uniquement par toi">👁 Privé</button>
+      <button class="btn-primary" data-act="rollTablePublic" data-a='["${t.id}"]' style="padding:.35rem .8rem;">🎲 Rouler</button>
     </div>
   `;
 }
@@ -247,6 +247,8 @@ function rollTablePublic(id) {
   }
 }
 
+ACT.teSetText = function (i) { teEntries[i].text = this.value; };
+ACT.teSetWeight = function (i) { teEntries[i].weight = Math.max(1, parseInt(this.value) || 1); };
 function showTableEditor(id) {
   const t = id ? randomTables.find(x => x.id === id) : null;
   activeTableId = id || null;
@@ -268,12 +270,12 @@ function renderTableEditor(t) {
       <div style="font-size:.8rem;font-weight:600;color:var(--text2);display:flex;align-items:center;gap:.5rem;">
         Entrées
         <span style="font-size:.7rem;color:var(--text2);">(texte · poids)</span>
-        <button class="journal-new-btn" onclick="teAddEntry()" style="margin-left:auto;">＋ Ligne</button>
+        <button class="journal-new-btn" data-act="teAddEntry" style="margin-left:auto;">＋ Ligne</button>
       </div>
       <div id="teEntriesList"></div>
     </div>
     <div class="journal-actions">
-      <button class="btn-primary" onclick="saveTable(${t ? `'${t.id}'` : 'null'})" style="padding:.4rem .9rem;">💾 Enregistrer</button>
+      <button class="btn-primary" data-act="saveTable" data-a='[${t ? `"${t.id}"` : 'null'}]' style="padding:.4rem .9rem;">💾 Enregistrer</button>
       <button class="journal-new-btn" onclick="${t ? `selectTable('${t.id}')` : 'resetTablesDetail()'}">Annuler</button>
     </div>
   `;
@@ -285,9 +287,9 @@ function renderTeEntries() {
   if (!el) return;
   el.innerHTML = teEntries.map((e, i) => `
     <div class="te-entry-row">
-      <input value="${esc(e.text)}" placeholder="Résultat…" oninput="teEntries[${i}].text=this.value">
-      <input class="te-weight" type="number" min="1" max="99" value="${e.weight}" oninput="teEntries[${i}].weight=Math.max(1,parseInt(this.value)||1)" title="Poids (fréquence relative)">
-      <button class="te-del" onclick="teRemoveEntry(${i})">✕</button>
+      <input value="${esc(e.text)}" placeholder="Résultat…" data-act="teSetText" data-a="[${i}]">
+      <input class="te-weight" type="number" min="1" max="99" value="${e.weight}" data-act="teSetWeight" data-a="[${i}]" title="Poids (fréquence relative)">
+      <button class="te-del" data-act="teRemoveEntry" data-a='[${i}]'>✕</button>
     </div>
   `).join('');
 }
@@ -368,8 +370,8 @@ function renderImportMenu() {
   const m = document.getElementById('importMenu');
   m.innerHTML = PRESET_TABLES.map((t, i) => `
     <div style="padding:.35rem .6rem;cursor:pointer;border-radius:5px;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
-         onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''"
-         onclick="importPreset(${i})">
+         data-act="hoverBgIn" data-act-out="hoverBgOut"
+         data-act="importPreset" data-a='[${i}]'>
       ${esc(t.name)}
     </div>
   `).join('');
@@ -409,7 +411,7 @@ function renderJournalList() {
     return;
   }
   el.innerHTML = handouts.map(h => `
-    <div class="journal-item ${activeHandoutId === h.id ? 'active' : ''}" onclick="selectHandout('${h.id}')">
+    <div class="journal-item ${activeHandoutId === h.id ? 'active' : ''}" data-act="selectHandout" data-a='["${h.id}"]'>
       <div class="journal-item-title">${esc(h.title)}</div>
       <div class="journal-item-meta">
         ${h.shared ? '<span class="journal-shared-badge">● Partagé</span>' : '<span style="color:var(--text2)">● Privé</span>'}
@@ -438,11 +440,11 @@ function showHandoutView(h) {
     : '';
   const gmActions = myRole === 'gm' ? `
     <div class="journal-actions">
-      <button class="journal-new-btn" onclick="showHandoutForm('${h.id}')">✏ Modifier</button>
-      <button class="journal-new-btn" onclick="toggleShareHandout('${h.id}')" style="${h.shared ? 'border-color:var(--danger);color:var(--danger);' : 'border-color:#22c55e;color:#22c55e;'}">
+      <button class="journal-new-btn" data-act="showHandoutForm" data-a='["${h.id}"]'>✏ Modifier</button>
+      <button class="journal-new-btn" data-act="toggleShareHandout" data-a='["${h.id}"]' style="${h.shared ? 'border-color:var(--danger);color:var(--danger);' : 'border-color:#22c55e;color:#22c55e;'}">
         ${h.shared ? '🔒 Masquer' : '📤 Partager'}
       </button>
-      <button class="journal-new-btn" onclick="deleteHandout('${h.id}')" style="border-color:var(--danger);color:var(--danger);margin-left:auto;">🗑 Supprimer</button>
+      <button class="journal-new-btn" data-act="deleteHandout" data-a='["${h.id}"]' style="border-color:var(--danger);color:var(--danger);margin-left:auto;">🗑 Supprimer</button>
     </div>` : '';
   area.innerHTML = `
     <div class="journal-view">
@@ -470,28 +472,28 @@ function showHandoutForm(id) {
           <input id="heImageUrl" placeholder="https://… ou laisser vide" value="${esc(h?.image_url || '')}" style="flex:1;">
           <label style="cursor:pointer;font-size:.78rem;color:var(--accent);white-space:nowrap;">
             📎 Upload
-            <input type="file" accept="image/*" style="display:none" onchange="uploadHandoutImage(this)">
+            <input type="file" accept="image/*" style="display:none" data-act="uploadHandoutImage" data-a='["$el"]'>
           </label>
         </div>
         ${h?.image_url ? `<img src="${esc(h.image_url)}" class="journal-edit-img" id="hePreview">` : '<img style="display:none" class="journal-edit-img" id="hePreview">'}
       </div>
       <!-- Tabs: Édition / Aperçu -->
       <div class="md-tabs">
-        <button class="md-tab active" id="mdTabEdit" onclick="switchMdTab('edit')">✏ Édition</button>
-        <button class="md-tab" id="mdTabPreview" onclick="switchMdTab('preview')">👁 Aperçu</button>
+        <button class="md-tab active" id="mdTabEdit" data-act="switchMdTab" data-a='["edit"]'>✏ Édition</button>
+        <button class="md-tab" id="mdTabPreview" data-act="switchMdTab" data-a='["preview"]'>👁 Aperçu</button>
       </div>
       <!-- Markdown toolbar -->
       <div class="md-toolbar" id="mdToolbar">
-        <button class="md-tb-btn" onclick="mdInsert('**','**')" title="Gras">B</button>
-        <button class="md-tb-btn" onclick="mdInsert('*','*')" title="Italique" style="font-style:italic;">I</button>
-        <button class="md-tb-btn" onclick="mdInsert('# ','')" title="Titre H1">H1</button>
-        <button class="md-tb-btn" onclick="mdInsert('## ','')" title="Titre H2">H2</button>
-        <button class="md-tb-btn" onclick="mdInsert('### ','')" title="Titre H3">H3</button>
-        <button class="md-tb-btn" onclick="mdInsert('- ','')" title="Liste">•</button>
-        <button class="md-tb-btn" onclick="mdInsert('> ','')" title="Citation">❝</button>
-        <button class="md-tb-btn" onclick="mdInsert('\`','\`')" title="Code">&lt;/&gt;</button>
-        <button class="md-tb-btn" onclick="mdInsert('---\\n','')" title="Séparateur">—</button>
-        <button class="md-tb-btn" onclick="mdInsert('| Col1 | Col2 |\\n| --- | --- |\\n| val | val |\\n','')" title="Tableau">⊞</button>
+        <button class="md-tb-btn" data-act="mdInsert" data-a='["**", "**"]' title="Gras">B</button>
+        <button class="md-tb-btn" data-act="mdInsert" data-a='["*", "*"]' title="Italique" style="font-style:italic;">I</button>
+        <button class="md-tb-btn" data-act="mdInsert" data-a='["# ", ""]' title="Titre H1">H1</button>
+        <button class="md-tb-btn" data-act="mdInsert" data-a='["## ", ""]' title="Titre H2">H2</button>
+        <button class="md-tb-btn" data-act="mdInsert" data-a='["### ", ""]' title="Titre H3">H3</button>
+        <button class="md-tb-btn" data-act="mdInsert" data-a='["- ", ""]' title="Liste">•</button>
+        <button class="md-tb-btn" data-act="mdInsert" data-a='["> ", ""]' title="Citation">❝</button>
+        <button class="md-tb-btn" data-act="mdInsert" data-a='["\`", "\`"]' title="Code">&lt;/&gt;</button>
+        <button class="md-tb-btn" data-act="mdInsert" data-a='["---\\\\n", ""]' title="Séparateur">—</button>
+        <button class="md-tb-btn" data-act="mdInsert" data-a='["| Col1 | Col2 |\\\\n| --- | --- |\\\\n| val | val |\\\\n", ""]' title="Tableau">⊞</button>
       </div>
       <!-- Edit area -->
       <div id="mdEditPanel" style="flex:1;display:flex;flex-direction:column;min-height:0;">
@@ -501,7 +503,7 @@ function showHandoutForm(id) {
       <div id="mdPreviewPanel" class="md-preview journal-view-text" style="display:none;"></div>
     </div>
     <div class="journal-actions" style="flex-shrink:0;">
-      <button class="btn-primary" onclick="saveHandout(${h ? `'${h.id}'` : 'null'})" style="padding:.4rem .9rem;">💾 Enregistrer</button>
+      <button class="btn-primary" data-act="saveHandout" data-a='[${h ? `"${h.id}"` : 'null'}]' style="padding:.4rem .9rem;">💾 Enregistrer</button>
       <button class="journal-new-btn" onclick="${h ? `selectHandout('${h.id}')` : 'closeJournalEdit()'}">Annuler</button>
     </div>
   `;
@@ -646,7 +648,7 @@ function showHandoutToast(h) {
   toast.className = 'handout-toast';
   toast.innerHTML = `
     <div class="handout-toast-text">📜 Nouveau document : <strong>${esc(h.title)}</strong></div>
-    <button class="handout-toast-see" onclick="openJournalAndSelect('${h.id}')">Voir</button>
+    <button class="handout-toast-see" data-act="openJournalAndSelect" data-a='["${h.id}"]'>Voir</button>
   `;
   document.body.appendChild(toast);
   setTimeout(() => toast.remove(), 7000);
@@ -742,7 +744,7 @@ function renderMacroList() {
       <div class="macro-swatch" style="background:${m.color}"></div>
       <span class="macro-item-name">${esc(m.name)}</span>
       <span class="macro-item-formula">${esc(m.formula)}</span>
-      <button class="macro-del" onclick="deleteMacro('${m.id}')" title="Supprimer">✕</button>
+      <button class="macro-del" data-act="deleteMacro" data-a='["${m.id}"]' title="Supprimer">✕</button>
     </div>
   `).join('');
 }
