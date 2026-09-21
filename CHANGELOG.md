@@ -2,6 +2,12 @@
 
 All notable changes to Sodales are documented in this file.
 
+## 2026.09.010 (2026-09-21)
+
+### Refactor — game.html modularization (step 3, map layer)
+- Extracted ~1,000 more lines from `game.html` (8,262 → 7,275; 11,072 originally) into five modules: `js/game/map-render.js` (grid + token drawing), `js/game/token-render.js` (token image cache), `js/game/map-overlays.js` (HP on tokens, pings, turn sound, freehand drawing, targeting), `js/game/shortcuts.js` (keyboard shortcuts + Ctrl+Z history), `js/game/map-extras.js` (spell zones, objects, render optimization).
+- Verbatim move (function census identical: 273 → 273), 0 JS errors in a real browser session — map rendered, tokens drawn, ping sent, hex grid toggled, all exercised.
+
 ## 2026.09.009 (2026-09-21)
 
 ### Refactor — game.html modularization (step 2)
