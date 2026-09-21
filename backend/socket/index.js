@@ -311,17 +311,17 @@ module.exports = function setupSocket(io) {
     }, { gmOnly: true }));
 
     // ── Créer un token (MJ) ───────────────────────────────
-    socket.on('token_create', scoped(async ({ campaign_id, map_id, label, x, y, color, character_id, size, image_url, hp_current, hp_max }, cid) => {
+    socket.on('token_create', scoped(async ({ campaign_id, map_id, label, x, y, color, character_id, size, image_url, hp_current, hp_max, visible }, cid) => {
       try {
         // Vérifier que la carte appartient bien à la campagne du socket
         const mapCheck = await db.query('SELECT id FROM maps WHERE id = $1 AND campaign_id = $2', [map_id, cid]);
         if (!mapCheck.rows[0]) return;
 
         const r = await db.query(
-          `INSERT INTO tokens (map_id, character_id, label, x, y, color, size, image_url, hp_current, hp_max)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
+          `INSERT INTO tokens (map_id, character_id, label, x, y, color, size, image_url, hp_current, hp_max, visible)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *`,
           [map_id, character_id || null, label || 'Token', x, y, color || '#c9a227', size || 1,
-           image_url || null, hp_current ?? null, hp_max ?? hp_current ?? null]
+           image_url || null, hp_current ?? null, hp_max ?? hp_current ?? null, visible === false ? false : true]
         );
         const token = r.rows[0];
         if (character_id) {
@@ -334,7 +334,15 @@ module.exports = function setupSocket(io) {
             token.char_vision_angle  = c.rows[0].vision_angle  || 360;
           }
         }
-        io.to(campaign_id).emit('token_created', token);
+        // Un jeton invisible (visible:false) ne part que vers les MJ — même
+        // règle que map_change et que le chargement initial de campagne.
+        if (token.visible === false) {
+          for (const dest of await io.in(campaign_id).fetchSockets()) {
+            if (dest.role === 'gm') dest.emit('token_created', token);
+          }
+        } else {
+          io.to(campaign_id).emit('token_created', token);
+        }
       } catch (err) {
         console.error('[WS] token_create error:', err);
       }
@@ -360,16 +368,24 @@ module.exports = function setupSocket(io) {
         const map = await db.query(
           'SELECT id,name,background_url,grid_size,width,height,is_active,fog_of_war,walls,lights FROM maps WHERE id = $1 AND campaign_id = $2',
           [map_id, cid]);
-        // Tokens : filtrer les tokens invisibles pour les non-MJ (point 4 du rapport d'audit)
+        // Tokens : les jetons invisibles (point 4 du rapport d'audit) ne
+        // doivent partir QUE vers les MJ. L'envoi est donc filtré par
+        // destinataire — filtrer sur le rôle de l'émetteur (toujours MJ ici,
+        // map_change est gmOnly) diffusait les jetons invisibles à tout le monde.
         const tokens = await db.query(
           `SELECT t.*, c.name AS char_name, c.portrait_url AS char_portrait,
                   c.user_id AS char_user_id, c.vision_radius AS char_vision_radius,
                   c.vision_angle AS char_vision_angle,
                   COALESCE(t.hp_max, c.hp_max) AS hp_max
            FROM tokens t LEFT JOIN characters c ON c.id = t.character_id
-           WHERE t.map_id = $1 AND (t.visible = TRUE OR $2 = 'gm')`, [map_id, socket.role]
+           WHERE t.map_id = $1`, [map_id]
         );
-        io.to(campaign_id).emit('map_changed', { map: map.rows[0], tokens: tokens.rows });
+        const mapChanged = { map: map.rows[0], tokens: tokens.rows };
+        for (const dest of await io.in(campaign_id).fetchSockets()) {
+          dest.emit('map_changed', dest.role === 'gm'
+            ? mapChanged
+            : { map: mapChanged.map, tokens: mapChanged.tokens.filter((t) => t.visible) });
+        }
       } catch (err) {
         console.error('[WS] map_change error:', err);
       }

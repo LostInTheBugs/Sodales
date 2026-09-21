@@ -2,6 +2,14 @@
 
 All notable changes to Sodales are documented in this file.
 
+## 2026.09.015 (2026-09-21)
+
+### Tests — coverage beyond authorization + two hidden-token leaks fixed
+- New test suites (35 tests, total 58 in CI): `tests/sheet-rules.test.js` (encumbrance math, item weights, vision meters, PF2e class DC and proficiency ranks — pure Node, no browser) and `tests/map-sync.socket.test.js` (token move broadcast/persistence/ownership, map change, fog of war, cross-campaign isolation).
+- **Fixed**: `map_change` filtered invisible tokens using the *sender's* role (always GM, since the event is GM-only) and then broadcast the same payload to everyone — players received invisible tokens. The payload is now built per recipient.
+- **Fixed**: `token_create` now accepts a `visible` flag and only sends an invisible token to GMs (same rule as the initial campaign load).
+- Test runner labels updated (`tests.yml`, `run-local.sh`).
+
 ## 2026.09.014 (2026-09-21)
 
 ### Fixes — fourth review: media handling on existing instances

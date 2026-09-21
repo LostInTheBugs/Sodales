@@ -107,13 +107,33 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:.
 
   <div class="timeline">
 
-    <!-- 2026.09.014 — Actuelle -->
+    <!-- 2026.09.015 — Actuelle -->
     <div class="release latest">
+      <div class="release-dot"></div>
+      <div class="release-head">
+        <span class="release-version">2026.09.015</span>
+        <span class="release-date">Septembre 2026</span>
+        <span class="release-tag tag-latest">Actuelle</span>
+      </div>
+      <div class="release-body">
+        <div class="change-group">
+          <div class="change-group-title">Tests étendus et fuites de jetons invisibles corrigées</div>
+          <ul class="change-list">
+            <li class="improve"><strong>35 nouveaux tests</strong> — règles des fiches (encombrement, poids d'objets, vision en mètres, CD de classe PF2e : 26 tests sans navigateur) et synchronisation carte/jetons (déplacements, propriété, brouillard, cloisonnement entre campagnes : 9 tests temps réel). Total en CI : <strong>58</strong></li>
+            <li class="fix"><strong>Jeton invisible diffusé aux joueurs lors d'un changement de carte</strong> — le filtre utilisait le rôle de l'émetteur (toujours MJ) et le même envoi partait à tout le monde ; l'envoi est maintenant filtré <em>par destinataire</em></li>
+            <li class="fix"><strong>Jeton invisible créé par le MJ</strong> — création avec <code>visible: false</code> possible et diffusion réservée aux MJ (même règle que le chargement de campagne)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2026.09.014 -->
+    <div class="release">
       <div class="release-dot"></div>
       <div class="release-head">
         <span class="release-version">2026.09.014</span>
         <span class="release-date">Septembre 2026</span>
-        <span class="release-tag tag-latest">Actuelle</span>
+        <span class="release-tag">Précédente</span>
       </div>
       <div class="release-body">
         <div class="change-group">

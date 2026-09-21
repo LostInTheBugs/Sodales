@@ -1,6 +1,7 @@
 name: Tests
 
-# Tests d'autorisation (REST + sockets) sur une base PostgreSQL jetable.
+# Tests automatisés Sodales sur une base PostgreSQL jetable :
+# autorisations (REST + sockets), synchronisation carte/jetons, règles de fiche.
 on:
   push:
     branches: [main]
@@ -39,6 +40,6 @@ jobs:
       - name: Dépendances
         working-directory: backend
         run: npm ci
-      - name: Tests d'autorisation (REST + sockets)
+      - name: Tests (autorisations + synchro carte/jetons + règles de fiche)
         working-directory: backend
         run: npm test
