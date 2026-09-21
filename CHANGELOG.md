@@ -2,6 +2,11 @@
 
 All notable changes to Sodales are documented in this file.
 
+## 2026.09.020 (2026-09-21)
+
+### Fixes — serialised upload quota
+- The per-user storage quota (500 MB) is now enforced inside a transaction with a `SELECT … FOR UPDATE` on the user row, so two simultaneous uploads cannot each pass the check and add up beyond the limit. Upload tests still green.
+
 ## 2026.09.019 (2026-09-21)
 
 ### External review follow-up — migrations, hardening, tests, docs

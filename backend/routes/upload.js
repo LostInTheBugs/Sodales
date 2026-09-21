@@ -77,6 +77,37 @@ async function quotaUtilise(userId) {
   return parseInt(r.rows[0].total, 10);
 }
 
+/**
+ * Contrôle du quota SÉRIALISÉ par utilisateur : la ligne de l'utilisateur est
+ * verrouillée (SELECT … FOR UPDATE) le temps de lire le total et d'enregistrer
+ * le fichier, sinon deux envois simultanés pourraient chacun passer sous la
+ * limite et additionner leur taille au-delà.
+ * Renvoie true si le fichier a été enregistré, false si le quota est dépassé.
+ */
+async function enregistrerSousQuota(userId, filename, taille, mime) {
+  const client = await db.pool.connect();
+  try {
+    await client.query('BEGIN');
+    await client.query('SELECT id FROM users WHERE id = $1 FOR UPDATE', [userId]);
+    const r = await client.query('SELECT COALESCE(SUM(taille), 0) AS total FROM uploads WHERE user_id = $1', [userId]);
+    if (parseInt(r.rows[0].total, 10) + taille > MAX_QUOTA_PER_USER) {
+      await client.query('ROLLBACK');
+      return false;
+    }
+    await client.query(
+      'INSERT INTO uploads (user_id, filename, taille, mime) VALUES ($1, $2, $3, $4)',
+      [userId, filename, taille, mime]
+    );
+    await client.query('COMMIT');
+    return true;
+  } catch (err) {
+    try { await client.query('ROLLBACK'); } catch { /* déjà annulée */ }
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
 // ── Helper : liste des fichiers d'un utilisateur ──
 async function fichiersUtilisateur(userId) {
   const r = await db.query(
@@ -108,22 +139,19 @@ router.post('/', authMiddleware, upload.single('file'), async (req, res) => {
     return jeter(`Fichier trop volumineux (max ${Math.round(maxPourType / 1024 / 1024)} Mo pour ce type)`);
   }
 
-  // 3. Quota par utilisateur (persistant en base)
-  const utilise = await quotaUtilise(req.user.id);
-  if (utilise + req.file.size > MAX_QUOTA_PER_USER) {
-    return jeter('Quota de stockage atteint (500 Mo). Supprimez des fichiers avant de réessayer.', 413);
-  }
-
-  // 4. Enregistrer la ligne en base
+  // 3. Quota par utilisateur — contrôle et enregistrement SÉRIALISÉS (verrou
+  //    sur la ligne utilisateur) pour que deux envois simultanés ne puissent
+  //    pas dépasser la limite ensemble.
+  let enregistre;
   try {
-    await db.query(
-      'INSERT INTO uploads (user_id, filename, taille, mime) VALUES ($1, $2, $3, $4)',
-      [req.user.id, req.file.filename, req.file.size, req.file.mimetype || null]
-    );
+    enregistre = await enregistrerSousQuota(req.user.id, req.file.filename, req.file.size, req.file.mimetype || null);
   } catch (dbErr) {
     console.error('[UPLOAD] Erreur DB insertion:', dbErr);
     fs.unlink(req.file.path, () => {});
     return res.status(500).json({ error: 'Erreur lors de l\'enregistrement du fichier' });
+  }
+  if (!enregistre) {
+    return jeter('Quota de stockage atteint (500 Mo). Supprimez des fichiers avant de réessayer.', 413);
   }
 
   res.json({ url: `/uploads/${req.file.filename}` });
