@@ -7,7 +7,12 @@
 # Variables d'environnement (optionnelles) :
 #   SODALES_ASSETS_VERSION  version des médias à installer (défaut : celle du dépôt)
 #   SODALES_ASSETS_URL      URL de l'archive (défaut : release GitHub)
-#   SODALES_ASSETS_SHA      empreinte SHA-256 attendue (obligatoire si URL/version custom)
+#   SODALES_ASSETS_SHA      empreinte SHA-256 attendue. Par défaut : l'empreinte
+#                           épinglée ci-dessous pour la version du dépôt — elle
+#                           s'applique donc aussi à une URL personnalisée qui sert
+#                           la MÊME version. Elle n'est exigée explicitement que
+#                           pour une version inconnue du script (aucune empreinte
+#                           épinglée disponible).
 set -e
 cd "$(dirname "$0")"
 
