@@ -17,10 +17,14 @@ async function authMiddleware(req, res, next) {
     const payload = jwt.verify(token, JWT_SECRET);
     // Révocation : le jeton porte la version du compte (tv) émise au login ;
     // un changement de mot de passe incrémente users.token_version.
-    const r = await db.query('SELECT COALESCE(token_version, 0) AS tv FROM users WHERE id = $1', [payload.id]);
+    const r = await db.query('SELECT COALESCE(token_version, 0) AS tv, is_admin, tier FROM users WHERE id = $1', [payload.id]);
     if (!r.rows[0] || (payload.tv || 0) !== Number(r.rows[0].tv)) {
       return res.status(401).json({ error: 'Session révoquée — reconnectez-vous' });
     }
+    // Rôles relus en base à chaque requête : une (rétro)gradation prend effet
+    // immédiatement — le jeton ne fait plus autorité pour is_admin/tier.
+    payload.is_admin = !!r.rows[0].is_admin;
+    payload.tier = r.rows[0].tier || 'player';
     req.user = payload;
     next();
   } catch {

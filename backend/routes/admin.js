@@ -100,6 +100,8 @@ router.delete('/users/:id', async (req, res) => {
   if (req.params.id === req.user.id) return res.status(400).json({ error: 'Impossible de supprimer son propre compte' });
   try {
     await db.query('DELETE FROM users WHERE id = $1', [req.params.id]);
+    const io = req.app.get('io');
+    if (io) io.in('user:' + req.params.id).disconnectSockets(true);
     res.json({ ok: true });
   } catch (err) {
     console.error('[ADMIN] delete user error:', err);
@@ -116,9 +118,13 @@ router.put('/users/:id/toggle-admin', async (req, res) => {
     if (!cur.rows[0]) return res.status(404).json({ error: 'Utilisateur introuvable' });
     const newAdmin = !cur.rows[0].is_admin;
     const r = await db.query(
-      'UPDATE users SET is_admin = $1, tier = $2 WHERE id = $3 RETURNING id, username, is_admin, tier',
+      'UPDATE users SET is_admin = $1, tier = $2, token_version = COALESCE(token_version, 0) + 1 WHERE id = $3 RETURNING id, username, is_admin, tier',
       [newAdmin, newAdmin ? 'admin' : 'creator', req.params.id]
     );
+    // Multi-joueurs : rôles figés dans le jeton → on révoque immédiatement
+    // (les sessions se reconnectent avec un jeton qui reflète le nouveau rôle).
+    const io = req.app.get('io');
+    if (io) io.in('user:' + req.params.id).disconnectSockets(true);
     res.json(r.rows[0]);
   } catch (err) {
     console.error('[ADMIN] toggle-admin error:', err);
@@ -134,10 +140,12 @@ router.put('/users/:id/set-tier', async (req, res) => {
   if (!validTiers.includes(tier)) return res.status(400).json({ error: 'Tier invalide' });
   try {
     const r = await db.query(
-      'UPDATE users SET tier = $1 WHERE id = $2 RETURNING id, username, tier',
+      'UPDATE users SET tier = $1, token_version = COALESCE(token_version, 0) + 1 WHERE id = $2 RETURNING id, username, tier',
       [tier, req.params.id]
     );
     if (!r.rows[0]) return res.status(404).json({ error: 'Utilisateur introuvable' });
+    const io = req.app.get('io');
+    if (io) io.in('user:' + req.params.id).disconnectSockets(true);
     res.json(r.rows[0]);
   } catch (err) {
     console.error('[ADMIN] set-tier error:', err);

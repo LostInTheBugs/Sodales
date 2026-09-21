@@ -61,6 +61,7 @@ module.exports = function setupSocket(io) {
         return next(new Error('Session révoquée'));
       }
       socket.user = payload;
+      socket.join('user:' + socket.user.id); // room par utilisateur (révocation à chaud)
       next();
     } catch {
       next(new Error('Token invalide'));

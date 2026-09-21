@@ -87,6 +87,9 @@ router.put('/password', async (req, res) => {
       [hash, req.user.id]
     );
     const token = generateToken({ ...req.user, token_version: up.rows[0].token_version });
+    // Coupe les sockets ouverts de ce compte (sessions de jeu en cours)
+    const io = req.app.get('io');
+    if (io) io.in('user:' + req.user.id).disconnectSockets(true);
     res.json({ ok: true, token });
   } catch (err) {
     console.error('[ACCOUNT] password error:', err);
@@ -138,6 +141,26 @@ router.get('/owned-campaigns', async (req, res) => {
 //     { campaign_id, action: 'transfer' | 'delete', transfer_to?: userId }
 //   ]
 // }
+// ── POST /logout-others ───────────────────────────────────────
+// Révoque les autres sessions (jetons + sockets) sans changer le mot de
+// passe : incrémente token_version, coupe les sockets et émet un jeton neuf
+// pour la session courante.
+router.post('/logout-others', authMiddleware, async (req, res) => {
+  try {
+    const up = await db.query(
+      'UPDATE users SET token_version = COALESCE(token_version, 0) + 1 WHERE id = $1 RETURNING COALESCE(token_version, 0) AS token_version',
+      [req.user.id]
+    );
+    const token = generateToken({ ...req.user, token_version: up.rows[0].token_version });
+    const io = req.app.get('io');
+    if (io) io.in('user:' + req.user.id).disconnectSockets(true);
+    res.json({ ok: true, token });
+  } catch (err) {
+    console.error('[ACCOUNT] logout-others error:', err);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
 router.delete('/', async (req, res) => {
   const { password, keep_characters, campaign_actions = [] } = req.body;
 

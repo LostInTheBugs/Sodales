@@ -204,6 +204,7 @@ input:disabled{opacity:.5;cursor:not-allowed;}
         <input type="password" id="pwConfirm" placeholder="••••••••"/>
       </div>
       <button class="btn btn-primary" onclick="changePassword()" id="btnChangePw">Changer le mot de passe</button>
+      <button class="btn btn-secondary" onclick="logoutOthers()" id="btnLogoutOthers" style="margin-left:.6rem;">Déconnecter les autres sessions</button>
     </div>
   </div>
 
@@ -452,11 +453,21 @@ async function changePassword() {
   btn.disabled = true; btn.textContent = 'Changement…';
   try {
     const resp = await API.account.changePassword({ current_password: current, new_password: newPw });
-        if (resp && resp.token) localStorage.setItem(TOKEN_KEY, resp.token);
+        if (resp && resp.token) setToken(resp.token);
     document.getElementById('pwCurrent').value = '';
     document.getElementById('pwNew').value = '';
     document.getElementById('pwConfirm').value = '';
     showAlert('pw-alert', 'Mot de passe changé ! Les autres sessions ont été déconnectées.', 'success');
+
+async function logoutOthers() {
+  try {
+    const resp = await API.account.logoutOthers();
+    if (resp && resp.token) { setToken(resp.token); }
+    showAlert('pw-alert', 'Les autres sessions ont été déconnectées.', 'success');
+  } catch (err) {
+    showAlert('pw-alert', err.message);
+  }
+}
   } catch (err) {
     showAlert('pw-alert', err.message);
   } finally {

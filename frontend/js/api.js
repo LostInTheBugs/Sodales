@@ -51,6 +51,7 @@ const API = {
     me:              ()       => apiFetch('/account/me'),
     updateProfile:   (data)   => apiFetch('/account/profile',          { method: 'PUT',    body: JSON.stringify(data) }),
     changePassword:  (data)   => apiFetch('/account/password',         { method: 'PUT',    body: JSON.stringify(data) }),
+    logoutOthers:    ()       => apiFetch('/account/logout-others',      { method: 'POST'   }),
     ownedCampaigns:  ()       => apiFetch('/account/owned-campaigns'),
     deleteAccount:   (data)   => apiFetch('/account',                  { method: 'DELETE', body: JSON.stringify(data) }),
   },

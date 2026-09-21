@@ -106,13 +106,35 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:.
 
   <div class="timeline">
 
-    <!-- 2026.09.004 — Actuelle -->
+    <!-- 2026.09.005 — Actuelle -->
     <div class="release latest">
+      <div class="release-dot"></div>
+      <div class="release-head">
+        <span class="release-version">2026.09.005</span>
+        <span class="release-date">Septembre 2026</span>
+        <span class="release-tag tag-latest">Actuelle</span>
+      </div>
+      <div class="release-body">
+        <div class="change-group">
+          <div class="change-group-title">Sécurité &amp; sessions</div>
+          <ul class="change-list">
+            <li class="improve"><strong>Rôles à effet immédiat</strong> — les rôles (admin, tier) sont relus en base à chaque requête : une rétrogradation s'applique tout de suite, sans attendre l'expiration du jeton</li>
+            <li class="improve"><strong>Révocation à chaud</strong> — promotion, rétrogradation, changement de tier ou suppression de compte révoquent les jetons <em>et</em> coupent les sessions de jeu ouvertes (WebSocket)</li>
+            <li class="improve"><strong>Déconnecter les autres sessions</strong> — nouveau bouton dans Mon compte : coupe toutes les autres sessions (jetons et sockets) sans changer le mot de passe</li>
+            <li class="fix"><strong>Changement de mot de passe</strong> — coupe aussi les sockets ouverts du compte, en plus des anciens jetons</li>
+            <li class="improve"><strong>CSP (Report-Only)</strong> — le serveur web mesure désormais les scripts inline (aucun blocage, mode observation)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2026.09.004 -->
+    <div class="release">
       <div class="release-dot"></div>
       <div class="release-head">
         <span class="release-version">2026.09.004</span>
         <span class="release-date">Septembre 2026</span>
-        <span class="release-tag tag-latest">Actuelle</span>
+        <span class="release-tag">Précédente</span>
       </div>
       <div class="release-body">
         <div class="change-group">

@@ -2,6 +2,16 @@
 
 All notable changes to Sodales are documented in this file.
 
+## 2026.09.005 (2026-09-21)
+
+### Security — review follow-up #2
+- Roles are re-read from the database on every request (and at socket handshake): an admin demotion or tier change now takes effect immediately, instead of remaining valid in the JWT for up to 7 days.
+- Admin promotion/demotion, tier changes and account deletion now increment `token_version` and disconnect every live socket of that account — each socket joins a per-user room (`user:<id>`) at handshake.
+- Changing the password also disconnects the account's live sockets, and a new route `POST /account/logout-others` revokes every other session (tokens + sockets) without changing the password — exposed as a button on the account page.
+
+### Web server
+- Content-Security-Policy added in **Report-Only** mode (measures the inline-script surface — `game.html` — before any enforcement; nothing is blocked).
+
 ## 2026.09.004 (2026-09-21)
 
 ### Security — hardening (external review follow-up)
