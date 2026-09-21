@@ -107,13 +107,34 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:.
 
   <div class="timeline">
 
-    <!-- 2026.09.013 — Actuelle -->
+    <!-- 2026.09.014 — Actuelle -->
     <div class="release latest">
+      <div class="release-dot"></div>
+      <div class="release-head">
+        <span class="release-version">2026.09.014</span>
+        <span class="release-date">Septembre 2026</span>
+        <span class="release-tag tag-latest">Actuelle</span>
+      </div>
+      <div class="release-body">
+        <div class="change-group">
+          <div class="change-group-title">Mise à jour des instances existantes — médias</div>
+          <ul class="change-list">
+            <li class="fix"><strong>update.sh ne supprime plus vos médias</strong> — le reset de git effaçait les fichiers qui étaient encore suivis ; les médias sont désormais restaurés/complétés juste après, automatiquement</li>
+            <li class="fix"><strong>Archive vérifiée par SHA-256</strong> — le téléchargement est contrôlé <em>avant</em> extraction ; une archive altérée est rejetée (extraction en <code>--no-same-owner</code>)</li>
+            <li class="fix"><strong>Nouvelles versions de médias installées</strong> — la version est enregistrée (<code>frontend/.assets-version</code>) et comparée : les prochaines releases d'assets arriveront aussi chez les instances existantes</li>
+            <li class="improve">Une URL d'assets personnalisée exige maintenant une empreinte explicite (pas de téléchargement non vérifié)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2026.09.013 -->
+    <div class="release">
       <div class="release-dot"></div>
       <div class="release-head">
         <span class="release-version">2026.09.013</span>
         <span class="release-date">Septembre 2026</span>
-        <span class="release-tag tag-latest">Actuelle</span>
+        <span class="release-tag">Précédente</span>
       </div>
       <div class="release-body">
         <div class="change-group">

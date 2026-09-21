@@ -90,6 +90,15 @@ info "Application des mises à jour..."
 git reset --hard "origin/${BRANCH}"
 success "Code mis à jour vers ${COMMIT_REMOTE:0:8}."
 
+# ── 6bis. Médias (hors git) ───────────────────────────────────
+# Les médias ne sont plus suivis par git : le reset ci-dessus supprime donc
+# ceux qui étaient encore suivis dans l'ancienne version, et une nouvelle
+# version de médias ne serait pas installée. fetch-assets.sh restaure/complète
+# (téléchargement vérifié par SHA-256, idempotent).
+if [ -f fetch-assets.sh ]; then
+  bash ./fetch-assets.sh || warn "Médias non restaurés — relancez ./fetch-assets.sh."
+fi
+
 # ── 7. Nouvelles cartes par défaut ────────────────────────────
 if $MAPS_CHANGED && [[ -d frontend/maps ]]; then
   COPIED=0

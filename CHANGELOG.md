@@ -2,6 +2,13 @@
 
 All notable changes to Sodales are documented in this file.
 
+## 2026.09.014 (2026-09-21)
+
+### Fixes — fourth review: media handling on existing instances
+- `update.sh` now restores the media right after `git reset --hard` (they are no longer tracked, so the reset used to delete them on existing installs) and installs a newer asset version when one is published.
+- `fetch-assets.sh`: the archive's SHA-256 is pinned and verified **before** extraction (a tampered download is rejected, nothing is extracted); `--no-same-owner` on extraction; the installed asset version is recorded in `frontend/.assets-version` and compared, so future `assets-YYYY.MM` releases reach existing instances.
+- A custom `SODALES_ASSETS_URL` now requires an explicit `SODALES_ASSETS_SHA` — no silent unverified download.
+
 ## 2026.09.013 (2026-09-21)
 
 ### Fixes — third review: CSP everywhere, local QR, media residue, admin delete ordering

@@ -43,3 +43,4 @@ frontend/img/cats-*.png
 frontend/img/*.gif
 frontend/maps/*.jpg
 frontend/maps/*.png
+frontend/.assets-version
