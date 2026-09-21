@@ -2,6 +2,12 @@
 
 All notable changes to Sodales are documented in this file.
 
+## 2026.09.009 (2026-09-21)
+
+### Refactor — game.html modularization (step 2)
+- Extracted ~1,070 more lines from `game.html` (9,323 → 8,262; 11,072 originally) into four modules: `js/game/token-creator.js` (token creation + placement), `js/game/npc-library.js` (D&D 5e NPC library, CR 0 → 20+), `js/game/combo-select.js` (sheet dropdown helpers), `js/game/sheet-rules.js` (encumbrance, vision in meters, class abilities, PF2e helpers).
+- Same guarantees as step 1: verbatim move (function census identical: 325 → 325, no duplicates), no logic rewrite, 0 JS errors in a real browser session — NPC library (103 cards), token creator and the character sheet all exercised.
+
 ## 2026.09.008 (2026-09-21)
 
 ### Refactor — game.html modularization (step 1)
