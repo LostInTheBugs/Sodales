@@ -1,5 +1,15 @@
 # Changelog
 
+All notable changes to Sodales are documented in this file.
+
+## 2026.09.001 (2026-09-21)
+
+### Changed
+- **Project renamed to Sodales** — family logo and brand assets (favicon set, app icon, login lockup), all app pages and titles updated, README rewritten in English with screenshots, MIT license added.
+
+### Technical
+- Repository renamed to `LostInTheBugs/Sodales` (old URLs redirect). Version bumped to 2026.09.001.
+
 ## 2026.08.008 (2026-08-13)
 
 ### Ajouts

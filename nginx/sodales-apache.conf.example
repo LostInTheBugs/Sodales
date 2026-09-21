@@ -2,10 +2,10 @@
 # Modules requis : proxy, proxy_http, proxy_wstunnel, ssl, rewrite
 # sudo a2enmod proxy proxy_http proxy_wstunnel ssl rewrite headers
 #
-# Copiez dans /etc/apache2/sites-available/virtualtable-rpg.conf
-# puis : a2ensite virtualtable-rpg && systemctl reload apache2
+# Copiez dans /etc/apache2/sites-available/sodales.conf
+# puis : a2ensite sodales && systemctl reload apache2
 #
-# Remplacez DOMAIN et /opt/virtualtable-rpg/frontend par vos valeurs.
+# Remplacez DOMAIN et /opt/sodales/frontend par vos valeurs.
 # SSL avec Let's Encrypt : certbot --apache -d DOMAIN
 
 <VirtualHost *:80>
@@ -28,9 +28,9 @@
     Header always set X-Content-Type-Options nosniff
 
     # Répertoire des fichiers statiques du frontend
-    DocumentRoot /opt/virtualtable-rpg/frontend
+    DocumentRoot /opt/sodales/frontend
 
-    <Directory /opt/virtualtable-rpg/frontend>
+    <Directory /opt/sodales/frontend>
         Options -Indexes
         AllowOverride None
         Require all granted

@@ -1,6 +1,6 @@
 # Exemple de configuration nginx pour un nginx EXISTANT (hors Docker).
-# Copiez ce fichier dans /etc/nginx/sites-available/virtualtable-rpg
-# puis : ln -s /etc/nginx/sites-available/virtualtable-rpg /etc/nginx/sites-enabled/
+# Copiez ce fichier dans /etc/nginx/sites-available/sodales
+# puis : ln -s /etc/nginx/sites-available/sodales /etc/nginx/sites-enabled/
 # et : nginx -s reload
 #
 # Remplacez DOMAIN par votre domaine réel.
@@ -31,7 +31,7 @@ server {
 
     # Répertoire des fichiers statiques du frontend
     # Remplacez par le chemin réel de votre clone
-    root /opt/virtualtable-rpg/frontend;
+    root /opt/sodales/frontend;
     index index.html;
 
     # RPG Backend (API REST + Socket.io)

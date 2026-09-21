@@ -1,7 +1,7 @@
 {
-  "name": "virtualtable-rpg-backend",
-  "version": "2026.08.008",
-  "description": "Roll20-like VirtualTable RPG backend",
+  "name": "sodales-backend",
+  "version": "2026.09.001",
+  "description": "Sodales — self-hosted virtual tabletop (VTT) backend",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

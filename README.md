@@ -1,19 +1,34 @@
-# VirtualTable RPG
+# Sodales
 
-Self-hosted online tabletop RPG (VTT).
+Self-hosted virtual tabletop (VTT) for tabletop RPG campaigns — interactive maps with fog of war, character sheets for 15 game systems, 3D dice and real-time play.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="frontend/img/sodales-lockup-dark.png">
+  <img src="frontend/img/sodales-lockup.png" alt="Sodales" width="320">
+</picture>
 
 **Stack**: Node.js · Express · Socket.io · PostgreSQL · Docker · nginx
 
 ## Features
 
 - Interactive maps with tokens, fog of war, walls and dynamic lighting
+- Per-character vision system and line-of-sight targeting
 - Full D&D 5e character sheets (stats, spells, inventory, subclasses)
-- Chat with dice rolls, private messages, macros
+- Character sheets for 15 game systems: D&D 5e, Pathfinder 2e, Warhammer Fantasy, Call of Cthulhu, Starfinder, Shadowrun, Vampire: The Masquerade, Cyberpunk Red, Savage Worlds, Dune, Star Wars, The Lord of the Rings, Paranoia, Tomorrow City, Cats! La Mascarade
+- AI-generated portraits and animations for the playable races and classes of every system
+- 3D dice with multiple visual themes, chat with private messages and macros
 - Ambient music and weather effects
 - Markdown campaign journal, shared handouts, random tables
 - Leveling with GM approval (D&D 5e rules)
-- Per-character vision system
 - UVTT map import
+
+## Screenshots
+
+<img src="docs/sodales-login.png" alt="Login" width="720">
+
+<img src="docs/sodales-lobby.png" alt="Campaign lobby" width="720">
+
+<img src="docs/sodales-game.png" alt="Game room" width="720">
 
 ## Installation
 
@@ -26,8 +41,8 @@ Self-hosted online tabletop RPG (VTT).
 ### Install
 
 ```bash
-git clone https://github.com/LostInTheBugs/virtualtable-rpg-ds.git
-cd virtualtable-rpg-ds
+git clone https://github.com/LostInTheBugs/Sodales.git
+cd Sodales
 sudo ./install.sh
 ```
 
@@ -85,9 +100,9 @@ docker exec rpg-db pg_dump -U rpg rpg > backup_$(date +%Y%m%d).sql
 
 ## Version
 
-Current version: **2026.08.001**
+Current version: **2026.09.001**
 
-[Release notes and GitHub releases](https://github.com/LostInTheBugs/virtualtable-rpg-ds/releases)
+[Release notes and GitHub releases](https://github.com/LostInTheBugs/Sodales/releases)
 
 ## Project structure
 
@@ -99,6 +114,7 @@ Current version: **2026.08.001**
 │   └── schema.sql    — PostgreSQL schema
 ├── frontend/         — HTML/CSS/JS interface
 ├── nginx/            — nginx configuration (templates)
+├── docs/             — Screenshots
 ├── docker-compose.yml
 ├── .env.example
 └── install.sh        — Installation script
@@ -110,6 +126,8 @@ Current version: **2026.08.001**
 - All secrets are randomly generated at installation
 - HTTPS mandatory via Let's Encrypt
 - JWT for authentication
+- bcrypt password hashing, rate limiting and account lockout on authentication endpoints
+- Upload validation (magic bytes, per-user quota)
 
 ## Development cost (LLM)
 
@@ -128,4 +146,4 @@ Full breakdown: [TOKENS.md](TOKENS.md).
 
 ## License
 
-Personal use / self-hosting.
+MIT — see [LICENSE](LICENSE).

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ═══════════════════════════════════════════════════════════════
-#  VirtualTable RPG — Script de mise à jour (sans sudo)
+#  Sodales — Script de mise à jour (sans sudo)
 #  Usage : ./deploy.sh
 #
 #  Adapté pour un serveur où l'utilisateur est dans le groupe
@@ -38,7 +38,7 @@ FRONTEND_SRC="frontend"
 
 echo ""
 echo -e "${CYAN}╔════════════════════════════════════════════╗${NC}"
-echo -e "${CYAN}║   VirtualTable RPG — Mise à jour           ║${NC}"
+echo -e "${CYAN}║           Sodales — Mise à jour            ║${NC}"
 echo -e "${CYAN}╚════════════════════════════════════════════╝${NC}"
 echo ""
 

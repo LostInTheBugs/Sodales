@@ -3,7 +3,10 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>VirtualTable RPG — Mon Compte</title>
+<title>Sodales — Mon Compte</title>
+<link rel="icon" href="/favicon.ico?v=2026.09.001" sizes="any"/>
+<link rel="icon" type="image/png" href="/favicon.png?v=2026.09.001"/>
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2026.09.001"/>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
 <script defer src="/script.js" data-website-id="f30f0aac-dc25-407f-8f70-cc389c9df496"></script>
 <style>
@@ -13,6 +16,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
 
 header{background:var(--surface);border-bottom:1px solid var(--border);padding:.8rem 1.5rem;display:flex;align-items:center;gap:1rem;position:sticky;top:0;z-index:30;}
 .logo-sm{font-family:'Cinzel',serif;color:var(--accent);font-size:1.05rem;text-decoration:none;}
+.logo-sm .brand-ico{height:28px;vertical-align:middle;margin-right:.45rem;}
 .spacer{flex:1;}
 .user-badge{display:flex;align-items:center;gap:.6rem;font-size:.875rem;color:var(--text2);}
 .avatar-wrap{position:relative;cursor:pointer;}
@@ -117,7 +121,7 @@ input:disabled{opacity:.5;cursor:not-allowed;}
 <body>
 
 <header>
-  <a class="logo-sm" href="/lobby.html">⚔ VirtualTable RPG</a>
+  <a class="logo-sm" href="/lobby.html"><img class="brand-ico" src="/img/sodales-icon.png" alt=""/>Sodales</a>
   <div class="spacer"></div>
   <div class="user-badge">
     <div class="user-dropdown" id="userDropdown">

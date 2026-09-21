@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ═══════════════════════════════════════════════════════════════
-#  VirtualTable RPG — Script de mise à jour
+#  Sodales — Script de mise à jour
 #  Usage : sudo ./update.sh
 #
 #  Télécharge la dernière version depuis GitHub et applique
@@ -31,7 +31,7 @@ set -a; source .env; set +a
 
 echo ""
 echo -e "${CYAN}╔════════════════════════════════════════════╗${NC}"
-echo -e "${CYAN}║     VirtualTable RPG — Mise à jour         ║${NC}"
+echo -e "${CYAN}║           Sodales — Mise à jour            ║${NC}"
 echo -e "${CYAN}╚════════════════════════════════════════════╝${NC}"
 echo ""
 

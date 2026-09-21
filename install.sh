@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ═══════════════════════════════════════════════════════════════
-#  VirtualTable RPG — Script d'installation
+#  Sodales — Script d'installation
 #  Usage : sudo ./install.sh
 # ═══════════════════════════════════════════════════════════════
 set -euo pipefail
@@ -23,7 +23,7 @@ cd "$SCRIPT_DIR"
 
 echo ""
 echo -e "${CYAN}╔════════════════════════════════════════════╗${NC}"
-echo -e "${CYAN}║     VirtualTable RPG — Installation        ║${NC}"
+echo -e "${CYAN}║           Sodales — Installation           ║${NC}"
 echo -e "${CYAN}╚════════════════════════════════════════════╝${NC}"
 
 # ── 1. Lire .env existant ou créer depuis .env.example ────────
@@ -82,11 +82,11 @@ generate_secret() { openssl rand -hex 32 2>/dev/null || cat /dev/urandom | tr -d
 # Domaine / ALLOWED_ORIGIN
 if $USE_BUNDLED_NGINX || [[ "${WEB_CHOICE:-1}" == "2" ]]; then
   if [[ -z "${DOMAIN:-}" ]]; then
-    read -rp "Domaine de l'application (ex: virtualtable.example.com) : " DOMAIN
+    read -rp "Domaine de l'application (ex: sodales.example.com) : " DOMAIN
     [[ -z "$DOMAIN" ]] && error "Le domaine est obligatoire."
     sed -i "s|^DOMAIN=.*|DOMAIN=${DOMAIN}|" .env
   fi
-  if [[ -z "${ALLOWED_ORIGIN:-}" || "$ALLOWED_ORIGIN" == "https://virtualtable.example.com" ]]; then
+  if [[ -z "${ALLOWED_ORIGIN:-}" || "$ALLOWED_ORIGIN" == "https://sodales.example.com" ]]; then
     ALLOWED_ORIGIN="https://${DOMAIN}"
     sed -i "s|^ALLOWED_ORIGIN=.*|ALLOWED_ORIGIN=${ALLOWED_ORIGIN}|" .env
   fi
@@ -197,10 +197,10 @@ if $USE_BUNDLED_NGINX; then
   sed "s/DOMAIN_PLACEHOLDER/${DOMAIN}/g" nginx/default.conf.template > nginx/default.conf
 
   # Renouvellement auto
-  CRON_FILE="/etc/cron.d/virtualtable-certbot"
+  CRON_FILE="/etc/cron.d/sodales-certbot"
   if [[ ! -f "$CRON_FILE" ]]; then
     cat > "$CRON_FILE" << EOF
-# Renouvellement Let's Encrypt — VirtualTable RPG
+# Renouvellement Let's Encrypt — Sodales
 0 3,15 * * * root cd ${SCRIPT_DIR} && COMPOSE_PROFILES=nginx docker compose run --rm certbot renew --quiet && docker compose exec nginx-rpg nginx -s reload >> /var/log/certbot-renew.log 2>&1
 EOF
     chmod 644 "$CRON_FILE"
@@ -250,8 +250,8 @@ if ! $USE_BUNDLED_NGINX; then
   echo "    Pointez la DocumentRoot / root de votre vhost vers ce dossier."
   echo ""
   echo "  Exemples complets :"
-  echo "    nginx/virtualtable-rpg.conf.example"
-  echo "    nginx/virtualtable-rpg-apache.conf.example"
+  echo "    nginx/sodales.conf.example"
+  echo "    nginx/sodales-apache.conf.example"
 fi
 
 # ── 12. Fin ───────────────────────────────────────────────────
