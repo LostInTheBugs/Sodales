@@ -2,6 +2,12 @@
 
 All notable changes to Sodales are documented in this file.
 
+## 2026.09.008 (2026-09-21)
+
+### Refactor — game.html modularization (step 1)
+- Extracted ~1,760 lines out of the `game.html` monolith (11,072 → 9,323 lines) into three plain-script modules loaded before the main inline script: `js/game/chat.js` (chat + random tables), `js/game/dice.js` (2D/3D dice), `js/game/char-sidebar.js` (sheet tooltips, quick rolls, spell casting).
+- Verbatim move, no logic rewrite: function census identical before/after (412 functions, no duplicates), and a real browser session shows 0 JS errors — chat, dice picker, random tables and the character-sheet modal all exercised.
+
 ## 2026.09.007 (2026-09-21)
 
 ### Tests — authorization suite

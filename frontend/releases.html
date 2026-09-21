@@ -106,13 +106,32 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:.
 
   <div class="timeline">
 
-    <!-- 2026.09.007 — Actuelle -->
+    <!-- 2026.09.008 — Actuelle -->
     <div class="release latest">
+      <div class="release-dot"></div>
+      <div class="release-head">
+        <span class="release-version">2026.09.008</span>
+        <span class="release-date">Septembre 2026</span>
+        <span class="release-tag tag-latest">Actuelle</span>
+      </div>
+      <div class="release-body">
+        <div class="change-group">
+          <div class="change-group-title">Qualité de code — découpage de game.html (1/…)</div>
+          <ul class="change-list">
+            <li class="improve"><strong>Modules extraits</strong> — ~1 760 lignes sorties du monolithe (11 072 → 9 323) : <code>js/game/chat.js</code> (chat + tables aléatoires), <code>js/game/dice.js</code> (dés 2D/3D), <code>js/game/char-sidebar.js</code> (tooltips de fiche, jets rapides, sorts)</li>
+            <li class="improve"><strong>Sans changement de comportement</strong> — déplacement verbatim (recensement de fonctions identique : 412 avant/après, aucun doublon) et session navigateur réelle sans aucune erreur JS</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2026.09.007 -->
+    <div class="release">
       <div class="release-dot"></div>
       <div class="release-head">
         <span class="release-version">2026.09.007</span>
         <span class="release-date">Septembre 2026</span>
-        <span class="release-tag tag-latest">Actuelle</span>
+        <span class="release-tag">Précédente</span>
       </div>
       <div class="release-body">
         <div class="change-group">
