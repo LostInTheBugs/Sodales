@@ -288,6 +288,31 @@ describe('Brouillard de guerre', () => {
   });
 });
 
+describe('Diffusion ciblée côté MJ (cibles et chuchotements)', () => {
+  test('poser une cible : le MJ reçoit targets_state, le joueur ne reçoit que les siennes', async () => {
+    const gm = await join(gmToken, campaignA);
+    const player = await join(playerToken, campaignA);
+    const gmGot = H.once(gm, 'targets_state', { timeoutMs: 6000 });
+    player.emit('set_target', {
+      campaign_id: campaignA, from_token_id: tokOwner, to_token_id: tokOther, to_token_name: 'Héros 2',
+    });
+    const state = await gmGot;
+    assert.ok(Array.isArray(state), 'le MJ doit recevoir la liste des cibles');
+    assert.ok(state.some((t) => t.from_token_id === tokOwner), 'la cible posée doit y figurer');
+  });
+
+  test('un chuchotement parvient au MJ même quand le destinataire n\'est pas connecté', async () => {
+    const gm = await join(gmToken, campaignA);
+    const player = await join(playerToken, campaignA);
+    const gmGot = H.once(gm, 'whisper_received', { timeoutMs: 6000 });
+    player.emit('whisper', { campaign_id: campaignA, to_username: 'Personne Absente', content: 'psst, le MJ doit voir ceci' });
+    const msg = await gmGot;
+    assert.equal(msg.content, 'psst, le MJ doit voir ceci');
+    assert.equal(msg.type, 'whisper');
+    assert.equal(msg.from_me, false);
+  });
+});
+
 describe('Cloisonnement entre campagnes', () => {
   test('une activité dans la campagne A ne parvient pas à un membre présent dans la campagne B', async () => {
     // le joueur rejoint la room B (socket dédié)

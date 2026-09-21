@@ -107,13 +107,32 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:.
 
   <div class="timeline">
 
-    <!-- 2026.09.016 — Actuelle -->
+    <!-- 2026.09.017 — Actuelle -->
     <div class="release latest">
+      <div class="release-dot"></div>
+      <div class="release-head">
+        <span class="release-version">2026.09.017</span>
+        <span class="release-date">Septembre 2026</span>
+        <span class="release-tag tag-latest">Actuelle</span>
+      </div>
+      <div class="release-body">
+        <div class="change-group">
+          <div class="change-group-title">Préparation multi-serveurs et deux tests de plus</div>
+          <ul class="change-list">
+            <li class="improve"><strong>Plus aucune lecture de rôle dépendante du processus unique</strong> — chuchotements, cibles de combat, notifications de niveau : tout passe par <code>fetchSockets()</code> et <code>socket.data.role</code></li>
+            <li class="improve">2 nouveaux tests (cibles reçues par le MJ, chuchotement transmis au MJ) — 63 au total en CI</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2026.09.016 -->
+    <div class="release">
       <div class="release-dot"></div>
       <div class="release-head">
         <span class="release-version">2026.09.016</span>
         <span class="release-date">Septembre 2026</span>
-        <span class="release-tag tag-latest">Actuelle</span>
+        <span class="release-tag">Précédente</span>
       </div>
       <div class="release-body">
         <div class="change-group">

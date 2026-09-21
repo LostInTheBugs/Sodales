@@ -40,7 +40,7 @@ function scoped(handler, { gmOnly = false } = {}) {
   return async function (payload = {}) {
     const cid = this.campaignId;
     if (!cid) return;                    // join_campaign n'a pas été appelé
-    if (gmOnly && this.role !== 'gm') return;
+    if (gmOnly && this.data?.role !== 'gm') return;
     // Remplace le campaign_id du payload par celui du socket pour que
     // les handlers existants continuent de fonctionner sans modification
     return handler.call(this, { ...payload, campaign_id: cid }, cid);
@@ -136,7 +136,7 @@ module.exports = function setupSocket(io) {
                     COALESCE(t.hp_max, c.hp_max) AS hp_max
              FROM tokens t LEFT JOIN characters c ON c.id = t.character_id
              WHERE t.map_id = $1 AND (t.visible = TRUE OR $2 = 'gm')`,
-            [map.rows[0].id, socket.role]
+            [map.rows[0].id, socket.data?.role]
           );
           tokens = t.rows;
         }
@@ -268,7 +268,7 @@ module.exports = function setupSocket(io) {
         }
         // MJ voit tous les chuchotements (sauf si c'est lui l'expéditeur ou destinataire)
         roomSockets.forEach(s => {
-          if (s.role === 'gm' && s.id !== socket.id && s.id !== targetSocket?.id) {
+          if (s.data?.role === 'gm' && s.id !== socket.id && s.id !== targetSocket?.id) {
             s.emit('whisper_received', { ...whisperData, from_me: false });
           }
         });
@@ -306,7 +306,7 @@ module.exports = function setupSocket(io) {
     socket.on('token_move', scoped(async ({ campaign_id, map_id, token_id, x, y, facing }, cid) => {
       try {
         // Ownership check : le MJ peut tout bouger, un joueur seulement son token
-        if (socket.role !== 'gm') {
+        if (socket.data?.role !== 'gm') {
           const check = await db.query(
             `SELECT c.user_id AS char_user_id
              FROM tokens t LEFT JOIN characters c ON c.id = t.character_id
@@ -565,7 +565,7 @@ module.exports = function setupSocket(io) {
     // Stocké en mémoire : { campaign_id: [{ from_token_id, to_token_id, player_id, player_name, revealed }] }
     const campaignTargets = new Map();
 
-    socket.on('set_target', scoped(({ campaign_id, from_token_id, to_token_id, to_token_name }) => {
+    socket.on('set_target', scoped(async ({ campaign_id, from_token_id, to_token_id, to_token_name }) => {
       if (!campaignTargets.has(campaign_id)) campaignTargets.set(campaign_id, []);
       const targets = campaignTargets.get(campaign_id);
       // Supprimer l'ancienne cible du même joueur pour le même from_token
@@ -574,31 +574,29 @@ module.exports = function setupSocket(io) {
       if (idx >= 0) targets[idx] = target;
       else targets.push(target);
       // Envoyer au MJ toutes les cibles
-      if (socket.role === 'gm') {
+      if (socket.data?.role === 'gm') {
         io.to(campaign_id).emit('targets_state', targets.map(t => ({ ...t, player_name: t.player_id === socket.user.id ? t.player_name : t.player_name })));
       } else {
         // Joueur : voir ses propres cibles, le MJ voit tout
         socket.emit('targets_state', targets.filter(t => t.player_id === socket.user.id || t.revealed));
-        const gmSockets = [...io.sockets.adapter.rooms.get(campaign_id) || []]
-          .map(id => io.sockets.sockets.get(id)).filter(s => s?.role === 'gm');
-        gmSockets.forEach(gmSocket => gmSocket.emit('targets_state', targets));
+        const gmSockets = (await io.in(campaign_id).fetchSockets()).filter((dest) => dest.data?.role === 'gm');
+        gmSockets.forEach((gmSocket) => gmSocket.emit('targets_state', targets));
       }
     }));
 
-    socket.on('clear_target', scoped(({ campaign_id, from_token_id }) => {
+    socket.on('clear_target', scoped(async ({ campaign_id, from_token_id }) => {
       if (campaignTargets.has(campaign_id)) {
         const targets = campaignTargets.get(campaign_id);
         const cleared = targets.filter(t => !(t.player_id === socket.user.id && t.from_token_id === from_token_id));
         campaignTargets.set(campaign_id, cleared);
         // Notifier le MJ
-        const gmSockets = [...io.sockets.adapter.rooms.get(campaign_id) || []]
-          .map(id => io.sockets.sockets.get(id)).filter(s => s?.role === 'gm');
-        gmSockets.forEach(gmSocket => gmSocket.emit('targets_state', cleared));
+        const gmSockets = (await io.in(campaign_id).fetchSockets()).filter((dest) => dest.data?.role === 'gm');
+        gmSockets.forEach((gmSocket) => gmSocket.emit('targets_state', cleared));
         socket.emit('targets_state', cleared.filter(t => t.player_id === socket.user.id || t.revealed));
       }
     }));
 
-    socket.on('reveal_targets_on_roll', scoped(({ campaign_id, from_token_id, dice_data }) => {
+    socket.on('reveal_targets_on_roll', scoped(async ({ campaign_id, from_token_id, dice_data }) => {
       if (!campaignTargets.has(campaign_id)) return;
       const targets = campaignTargets.get(campaign_id);
       // Trouver les cibles du joueur pour ce token
@@ -609,9 +607,8 @@ module.exports = function setupSocket(io) {
         t.revealed = true;
       }
       // Mettre à jour tous les joueurs
-      const gmSockets = [...io.sockets.adapter.rooms.get(campaign_id) || []]
-        .map(id => io.sockets.sockets.get(id)).filter(s => s?.role === 'gm');
-      gmSockets.forEach(gmSocket => gmSocket.emit('targets_state', targets));
+      const gmSockets = (await io.in(campaign_id).fetchSockets()).filter((dest) => dest.data?.role === 'gm');
+      gmSockets.forEach((gmSocket) => gmSocket.emit('targets_state', targets));
       socket.to(campaign_id).emit('targets_state', targets.filter(t => t.revealed));
       socket.emit('targets_state', targets.filter(t => t.player_id === socket.user.id || t.revealed));
     }));
@@ -735,7 +732,7 @@ module.exports = function setupSocket(io) {
       const c = state.combatants.find(c => c.id === combatant_id);
       if (!c) return;
       // Ownership : le MJ peut tout modifier, un joueur seulement les PV de son personnage
-      if (socket.role !== 'gm') {
+      if (socket.data?.role !== 'gm') {
         if (!c.char_id) return; // PNJ sans fiche → réservé au MJ
         try {
           const own = await db.query(
@@ -1084,7 +1081,7 @@ module.exports = function setupSocket(io) {
         // Notifier tous les MJ de la campagne
         const sockets = await io.in(campaign_id).fetchSockets();
         for (const s of sockets) {
-          if (s.role === 'gm') {
+          if (s.data?.role === 'gm') {
             s.emit('level_up_pending', {
               request_id: req.rows[0].id,
               character_id,

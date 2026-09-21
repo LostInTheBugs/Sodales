@@ -2,6 +2,12 @@
 
 All notable changes to Sodales are documented in this file.
 
+## 2026.09.017 (2026-09-21)
+
+### Internal — no code path depends on the single-process socket map anymore
+- Remaining `io.sockets.sockets.get(id).role` reads replaced by `fetchSockets()` + `socket.data.role`: whispers, combat targets (`set_target`, `clear_target`, `reveal_targets_on_roll`), combat HP ownership, level-up notifications, campaign join filters and the `scoped()` GM guard.
+- 2 new tests covering those GM-targeted broadcasts (combat targets, whispers) — 63 total in CI.
+
 ## 2026.09.016 (2026-09-21)
 
 ### Fixes — all hidden-token leaks closed, centralised in one helper
