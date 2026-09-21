@@ -92,7 +92,8 @@ if $USE_BUNDLED_NGINX || [[ "${WEB_CHOICE:-1}" == "2" ]]; then
   fi
 else
   # Accès direct sans proxy
-  [[ -z "${ALLOWED_ORIGIN:-}" ]] && ALLOWED_ORIGIN="*"
+  # ALLOWED_ORIGIN vide = même origine uniquement (aucun en-tête CORS) — recommandé.
+  # Ne définir une valeur que pour un accès cross-origin explicite.
   sed -i "s|^ALLOWED_ORIGIN=.*|ALLOWED_ORIGIN=${ALLOWED_ORIGIN}|" .env
 fi
 

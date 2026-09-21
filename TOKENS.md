@@ -1,12 +1,14 @@
-# Token usage tracking — virtualtable-rpg-ds
+# Token usage tracking — Sodales
 
-LLM token usage for this project, tallied session by session.
+This project is built with AI agents. This file logs the LLM token usage of those
+development sessions, session by session — kept for transparency, and because the
+numbers are part of the project's story. It is not required to run the application.
 
 ## Cumulative tally (2026-08-02)
 
 | Metric | Value |
 |---|---|
-| Dev sessions (Hermes) | 1 |
+| Dev sessions | 1 |
 | Scripted agent sessions (API) | 28 |
 | Models | deepseek-v4-pro |
 | Messages | 635 |
@@ -19,28 +21,17 @@ LLM token usage for this project, tallied session by session.
 | **Total (input + output)** | **569 123** |
 | Estimated cost | ≈ 0.405 USD |
 
-> Repo created 2026-05-06: most of the initial development is not tracked in the local DB (scripted agents / other machines). The tally covers the security audit + fixes of Aug 01 and the scripted sessions.
+> Repo created 2026-05-06: most of the initial development is not tracked (scripted
+> agents / other machines). The tally covers the security audit + fixes of Aug 01
+> and the scripted sessions.
 
-## How to re-read the counter
+## Method
 
-The Hermes session database (SQLite) holds the exact counters:
+- Figures come from the development assistant's session counters — real runtime
+  numbers, not estimates.
+- "Scripted agent sessions" = automated sessions driven by scripts (audits,
+  releases, background tasks) attached to this project.
+- `reasoning_tokens` is probably included in `output_tokens` (to be confirmed
+  with the provider).
 
-```bash
-sqlite3 ~/.hermes/state.db "SELECT id, started_at, model,
-  input_tokens, output_tokens, cache_read_tokens, cache_write_tokens,
-  reasoning_tokens, estimated_cost_usd
-  FROM sessions WHERE cwd LIKE '%virtualtable%'
-  ORDER BY started_at;"
-```
-
-After each dev session, copy the matching row into the table above.
-
-## Notes
-
-- Tally taken from `~/.hermes/state.db` (table `sessions`) — these are the
-  real runtime counters, not an estimate.
-- « Scripted agent sessions (API) » = `api-*` sessions driven by scripts
-  (audits, releases, background tasks) attached to this project.
-- `reasoning_tokens` is probably included in `output_tokens`
-  (to be confirmed with the provider).
-- Tally generated on 2026-08-02 from the session database.
+After each development session, the matching counters are appended to the table.

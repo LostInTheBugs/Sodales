@@ -147,3 +147,13 @@ Full breakdown: [TOKENS.md](TOKENS.md).
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+## Trademarks & third-party content
+
+Sodales is an unofficial, non-commercial project — not affiliated with, sponsored or
+endorsed by any game publisher. Game system names referenced in the interface (D&D,
+Pathfinder, Warhammer, Call of Cthulhu, Shadowrun, Vampire, Cyberpunk, Savage Worlds,
+Dune, Star Wars, The Lord of the Rings, Paranoia…) are trademarks of their respective
+owners and are used descriptively to describe the rules a table plays with. Character
+illustrations shipped with the app are AI-generated and original to this project.
+

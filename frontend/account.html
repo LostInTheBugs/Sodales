@@ -451,11 +451,12 @@ async function changePassword() {
   const btn = document.getElementById('btnChangePw');
   btn.disabled = true; btn.textContent = 'Changement…';
   try {
-    await API.account.changePassword({ current_password: current, new_password: newPw });
+    const resp = await API.account.changePassword({ current_password: current, new_password: newPw });
+        if (resp && resp.token) localStorage.setItem(TOKEN_KEY, resp.token);
     document.getElementById('pwCurrent').value = '';
     document.getElementById('pwNew').value = '';
     document.getElementById('pwConfirm').value = '';
-    showAlert('pw-alert', 'Mot de passe changé avec succès !', 'success');
+    showAlert('pw-alert', 'Mot de passe changé ! Les autres sessions ont été déconnectées.', 'success');
   } catch (err) {
     showAlert('pw-alert', err.message);
   } finally {

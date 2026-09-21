@@ -50,11 +50,17 @@ function scoped(handler, { gmOnly = false } = {}) {
 module.exports = function setupSocket(io) {
 
   // ── Auth middleware Socket.io ──────────────────────────────
-  io.use((socket, next) => {
+  io.use(async (socket, next) => {
     const token = socket.handshake.auth?.token;
     if (!token) return next(new Error('Token manquant'));
     try {
-      socket.user = jwt.verify(token, JWT_SECRET);
+      const payload = jwt.verify(token, JWT_SECRET);
+      // Révocation : même contrôle que l'API (users.token_version).
+      const r = await db.query('SELECT COALESCE(token_version, 0) AS tv FROM users WHERE id = $1', [payload.id]);
+      if (!r.rows[0] || (payload.tv || 0) !== Number(r.rows[0].tv)) {
+        return next(new Error('Session révoquée'));
+      }
+      socket.user = payload;
       next();
     } catch {
       next(new Error('Token invalide'));

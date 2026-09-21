@@ -7,7 +7,7 @@ if (!JWT_SECRET || JWT_SECRET === 'change-me-in-production') {
   process.exit(1);
 }
 
-function authMiddleware(req, res, next) {
+async function authMiddleware(req, res, next) {
   const header = req.headers.authorization;
   if (!header || !header.startsWith('Bearer ')) {
     return res.status(401).json({ error: 'Token manquant' });
@@ -15,6 +15,12 @@ function authMiddleware(req, res, next) {
   const token = header.slice(7);
   try {
     const payload = jwt.verify(token, JWT_SECRET);
+    // Révocation : le jeton porte la version du compte (tv) émise au login ;
+    // un changement de mot de passe incrémente users.token_version.
+    const r = await db.query('SELECT COALESCE(token_version, 0) AS tv FROM users WHERE id = $1', [payload.id]);
+    if (!r.rows[0] || (payload.tv || 0) !== Number(r.rows[0].tv)) {
+      return res.status(401).json({ error: 'Session révoquée — reconnectez-vous' });
+    }
     req.user = payload;
     next();
   } catch {
@@ -24,7 +30,8 @@ function authMiddleware(req, res, next) {
 
 function generateToken(user) {
   return jwt.sign(
-    { id: user.id, username: user.username, email: user.email, is_admin: !!user.is_admin, tier: user.tier || 'player' },
+    { id: user.id, username: user.username, email: user.email, is_admin: !!user.is_admin,
+      tier: user.tier || 'player', tv: user.token_version ?? 0 },
     JWT_SECRET,
     { expiresIn: '7d' }
   );

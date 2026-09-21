@@ -2,9 +2,20 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
+const helmet = require('helmet');
 const db = require('./db');
 const fs = require('fs');
 const path = require('path');
+
+// ── CORS : jamais de joker implicite ─────────────────────────
+// Sans ALLOWED_ORIGIN, aucun en-tête CORS n'est émis : l'application (même
+// origine, servie par nginx) fonctionne, et toute lecture cross-origin est
+// refusée par le navigateur. '*'' explicite reste possible si voulu.
+const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN;
+if (!ALLOWED_ORIGIN) {
+  console.warn('[SEC] ALLOWED_ORIGIN non défini — CORS limité à la même origine (définissez-le pour un accès cross-origin explicite).');
+}
+const CORS_ORIGIN = ALLOWED_ORIGIN || false;
 
 const app = express();
 app.set('trust proxy', 1); // Apache proxy — nécessaire pour express-rate-limit
@@ -14,7 +25,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
   path: '/rpg/socket.io',
   cors: {
-    origin: process.env.ALLOWED_ORIGIN || '*',
+    origin: CORS_ORIGIN,
     methods: ['GET', 'POST'],
   },
 });
@@ -24,8 +35,9 @@ require('./socket')(io);
 app.set('io', io);
 
 // ── Middleware ───────────────────────────────────────────────
-app.use(cors({ origin: process.env.ALLOWED_ORIGIN || '*' }));
-app.use(express.json());
+app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
+app.use(cors({ origin: CORS_ORIGIN }));
+app.use(express.json({ limit: '1mb' }));
 
 // ── Health check ─────────────────────────────────────────────
 app.get('/rpg/api/health', (req, res) => res.json({ status: 'ok' }));

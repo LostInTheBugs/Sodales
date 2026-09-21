@@ -106,13 +106,34 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:.
 
   <div class="timeline">
 
-    <!-- 2026.09.002 — Actuelle -->
+    <!-- 2026.09.004 — Actuelle -->
     <div class="release latest">
+      <div class="release-dot"></div>
+      <div class="release-head">
+        <span class="release-version">2026.09.004</span>
+        <span class="release-date">Septembre 2026</span>
+        <span class="release-tag tag-latest">Actuelle</span>
+      </div>
+      <div class="release-body">
+        <div class="change-group">
+          <div class="change-group-title">Sécurité &amp; durcissements</div>
+          <ul class="change-list">
+            <li class="improve"><strong>CORS</strong> — plus de repli implicite sur « * » : sans <code>ALLOWED_ORIGIN</code>, l'API n'émet aucun en-tête CORS (même origine uniquement)</li>
+            <li class="improve"><strong>En-têtes de sécurité</strong> — helmet sur l'API (nosniff, X-Frame-Options, HSTS…), limite explicite de 1 Mo sur les corps JSON</li>
+            <li class="improve"><strong>Révocation des sessions</strong> — changer son mot de passe invalide tous les anciens jetons (API et WebSocket) et émet une session neuve</li>
+            <li class="fix"><strong>Installateur</strong> — <code>install.sh</code> ne pose plus « * » par défaut pour <code>ALLOWED_ORIGIN</code></li>
+            <li class="fix"><strong>Docs publiques</strong> — <code>TOKENS.md</code> assaini (plus de références internes), note sur les marques dans le README</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2026.09.002 -->
+    <div class="release">
       <div class="release-dot"></div>
       <div class="release-head">
         <span class="release-version">2026.09.002</span>
         <span class="release-date">Septembre 2026</span>
-        <span class="release-tag tag-latest">Actuelle</span>
       </div>
       <div class="release-body">
         <div class="change-group">

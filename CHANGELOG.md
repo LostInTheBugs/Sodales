@@ -2,6 +2,16 @@
 
 All notable changes to Sodales are documented in this file.
 
+## 2026.09.004 (2026-09-21)
+
+### Security — hardening (external review follow-up)
+- CORS no longer falls back to a wildcard: without `ALLOWED_ORIGIN`, no CORS headers are sent (same-origin only); an explicit value (including `*`) still works.
+- Added `helmet` on the API (without CSP — the app relies on inline scripts; a strict CSP is a separate project), an explicit `express.json` body limit (1 MB), and `install.sh` no longer defaults `ALLOWED_ORIGIN` to `*`.
+- Token revocation: JWTs now carry the account's `token_version`; changing the password increments it and invalidates all previous tokens (API middleware + socket handshake), then issues a fresh token to the current session.
+
+### Documentation
+- `TOKENS.md` cleaned up for a public audience (no internal references); README gained a trademarks / third-party content note.
+
 ## 2026.09.002 (2026-09-21)
 
 ### Corrections

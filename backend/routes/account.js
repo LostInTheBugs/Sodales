@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const bcrypt = require('bcryptjs');
 const db = require('../db');
-const { authMiddleware } = require('../middleware/auth');
+const { authMiddleware, generateToken } = require('../middleware/auth');
 
 // Toutes les routes compte requièrent auth
 router.use(authMiddleware);
@@ -80,8 +80,14 @@ router.put('/password', async (req, res) => {
     if (!valid) return res.status(401).json({ error: 'Mot de passe actuel incorrect' });
 
     const hash = await bcrypt.hash(new_password, 12);
-    await db.query('UPDATE users SET password_hash = $1 WHERE id = $2', [hash, req.user.id]);
-    res.json({ ok: true });
+    // Changer le mot de passe révoque toutes les sessions existantes
+    // (token_version++ vérifié par l'API et le socket), puis en émet une neuve.
+    const up = await db.query(
+      'UPDATE users SET password_hash = $1, token_version = COALESCE(token_version, 0) + 1 WHERE id = $2 RETURNING COALESCE(token_version, 0) AS token_version',
+      [hash, req.user.id]
+    );
+    const token = generateToken({ ...req.user, token_version: up.rows[0].token_version });
+    res.json({ ok: true, token });
   } catch (err) {
     console.error('[ACCOUNT] password error:', err);
     res.status(500).json({ error: 'Erreur serveur' });

@@ -119,7 +119,8 @@ router.post('/login', loginLimiter, checkHoneypot, async (req, res) => {
   try {
     const result = await db.query(
       `SELECT id, username, email, password_hash, avatar_url,
-              failed_attempts, locked_until, is_admin, invite_code, tier
+              failed_attempts, locked_until, is_admin, invite_code, tier,
+              COALESCE(token_version, 0) AS token_version
        FROM users WHERE email = $1`,
       [email.toLowerCase().trim()]
     );
@@ -174,8 +175,8 @@ router.post('/login', loginLimiter, checkHoneypot, async (req, res) => {
       [user.id]
     );
 
-    const { password_hash, failed_attempts, locked_until, ...safeUser } = user;
-    const token = generateToken(safeUser);
+    const { password_hash, failed_attempts, locked_until, token_version, ...safeUser } = user;
+    const token = generateToken({ ...safeUser, token_version });
     console.info(`[AUTH] Login réussi : ${user.username} depuis ${req.ip}`);
     res.json({ user: safeUser, token });
 
