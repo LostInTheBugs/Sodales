@@ -54,7 +54,7 @@ function initTableOverlay() {
   div.innerHTML = `
     <div class="lock-info" id="tableLockInfo">🔒 Verrouillé</div>
     <div class="qr-wrap">
-      <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(location.origin + '/lobby.html')}" alt="QR code" loading="lazy"/>
+      <div id="tableQr" class="qr-box"></div>
       <div class="qr-label">Scannez pour rejoindre</div>
     </div>
     <div class="to-bottom">
@@ -67,6 +67,15 @@ function initTableOverlay() {
     </div>
   `;
   document.body.appendChild(div);
+  const qrBox = document.getElementById('tableQr');
+  if (qrBox && typeof qrcode === 'function') {
+    try {
+      const q = qrcode(0, 'M');
+      q.addData(location.origin + '/lobby.html');
+      q.make();
+      qrBox.innerHTML = q.createImgTag(4, 8);
+    } catch (e) { console.warn('[QR] génération locale impossible :', e); }
+  }
 }
 
 function updateTableOnlineCount() {

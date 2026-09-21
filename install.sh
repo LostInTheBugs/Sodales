@@ -163,7 +163,7 @@ echo -e "  Backend         : ${RPG_BIND}:${RPG_PORT}"
 echo ""
 
 # ── 7. Préparer les dossiers ──────────────────────────────────
-mkdir -p certbot/www certbot/conf frontend/uploads nginx
+mkdir -p certbot/www certbot/conf frontend/uploads frontend/img frontend/maps frontend/music nginx
 chmod 755 frontend/uploads
 
 # Copier les cartes par défaut si pas encore présentes

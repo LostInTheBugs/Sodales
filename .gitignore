@@ -39,3 +39,7 @@ Thumbs.db
 frontend/img/*.jpg
 frontend/img/*.mp4
 frontend/music/*.mp3
+frontend/img/cats-*.png
+frontend/img/*.gif
+frontend/maps/*.jpg
+frontend/maps/*.png

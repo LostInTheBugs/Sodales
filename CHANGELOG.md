@@ -2,6 +2,16 @@
 
 All notable changes to Sodales are documented in this file.
 
+## 2026.09.013 (2026-09-21)
+
+### Fixes — third review: CSP everywhere, local QR, media residue, admin delete ordering
+- CSP added to the standalone-proxy configs (`nginx/sodales.conf.example`, `nginx/sodales-apache.conf.example`) so installs behind an existing proxy get it too.
+- QR code generated locally (vendored `qrcode-generator`, MIT) instead of calling `api.qrserver.com`; the CSP `img-src` no longer allows any third-party host.
+- Removed the remaining media from git tracking (AI cat portraits + default maps, ~13 MB) and purged them from history; the asset bundle (402 files, ~95 MB) is updated accordingly.
+- Admin account deletion now disconnects the user's sockets **before** the row is deleted (no window).
+- `window.ACT` alias exposed so module-level action helpers register (fixes `ACT is not defined` in the chat/audio modules).
+- Cache-busters bumped to `?v=2` for all modular JS.
+
 ## 2026.09.012 (2026-09-21)
 
 ### Security — Content-Security-Policy enforced (no more unsafe-inline for scripts)

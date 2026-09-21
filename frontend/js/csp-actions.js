@@ -14,6 +14,7 @@
 (function () {
   'use strict';
   const ACT = window.CSP_ACT = window.CSP_ACT || {};
+  window.ACT = ACT;   // alias global : les modules enregistrent leurs helpers via ACT.x
 
   // ── Actions intégrées (sans code applicatif) ──
   ACT.goto = (url) => { window.location.href = url; };

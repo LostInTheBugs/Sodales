@@ -99,9 +99,9 @@ router.put('/users/:id', async (req, res) => {
 router.delete('/users/:id', async (req, res) => {
   if (req.params.id === req.user.id) return res.status(400).json({ error: 'Impossible de supprimer son propre compte' });
   try {
-    await db.query('DELETE FROM users WHERE id = $1', [req.params.id]);
     const io = req.app.get('io');
     if (io) io.in('user:' + req.params.id).disconnectSockets(true);
+    await db.query('DELETE FROM users WHERE id = $1', [req.params.id]);
     res.json({ ok: true });
   } catch (err) {
     console.error('[ADMIN] delete user error:', err);
