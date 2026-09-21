@@ -2,6 +2,14 @@
 
 All notable changes to Sodales are documented in this file.
 
+## 2026.09.007 (2026-09-21)
+
+### Tests — authorization suite
+- First test suite in the repo: 23 integration tests (REST + WebSockets) covering campaign isolation (non-members), player vs GM permissions, character ownership, admin routes, JWT revocation (REST + socket handshake) and GM-only socket events.
+- Tests run against a throwaway PostgreSQL database (`PG_SUPER_URL`): the harness creates the DB, spawns the real backend and signs test JWTs directly to stay clear of the auth rate limiters.
+- New CI workflow `.github/workflows/tests.yml` runs the suite on every push / PR to `main`; `backend/tests/run-local.sh` runs it locally.
+- Validated as a real safety net: neutralizing the non-member guard in `campaigns.js` makes the suite fail.
+
 ## 2026.09.006 (2026-09-21)
 
 ### Repository & installer — media out of git

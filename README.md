@@ -59,6 +59,21 @@ The script asks three questions at startup:
 
 The script then automatically generates the secrets (JWT, DB password) and starts the application.
 
+## Tests
+
+Authorization regression tests (REST + WebSockets) run against a throwaway
+PostgreSQL database and a real backend instance — no mocks:
+
+```bash
+backend/tests/run-local.sh     # starts rpg-db if needed, then runs the suite
+```
+
+They cover campaign isolation (non-members cut off), player vs GM permissions,
+character ownership, admin routes, token revocation (REST + socket handshake)
+and GM-only socket events. The suite greps below the rate limiters by signing
+test JWTs directly; CI runs the same suite on every push to `main`
+(`.github/workflows/tests.yml`).
+
 ## Media assets
 
 The heavy media files (character portraits, I2V videos, music tracks — ~95 MB) are

@@ -106,13 +106,32 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:.
 
   <div class="timeline">
 
-    <!-- 2026.09.006 — Actuelle -->
+    <!-- 2026.09.007 — Actuelle -->
     <div class="release latest">
+      <div class="release-dot"></div>
+      <div class="release-head">
+        <span class="release-version">2026.09.007</span>
+        <span class="release-date">Septembre 2026</span>
+        <span class="release-tag tag-latest">Actuelle</span>
+      </div>
+      <div class="release-body">
+        <div class="change-group">
+          <div class="change-group-title">Tests</div>
+          <ul class="change-list">
+            <li class="improve"><strong>Suite d'autorisations</strong> — 23 tests d'intégration (REST + WebSocket) : cloisonnement des campagnes, joueur vs MJ, propriété des fiches, routes d'administration, révocation des jetons, événements réservés au MJ</li>
+            <li class="improve"><strong>CI</strong> — les tests tournent à chaque push sur main ; lancement local via <code>backend/tests/run-local.sh</code> (base jetable, aucun mock)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2026.09.006 -->
+    <div class="release">
       <div class="release-dot"></div>
       <div class="release-head">
         <span class="release-version">2026.09.006</span>
         <span class="release-date">Septembre 2026</span>
-        <span class="release-tag tag-latest">Actuelle</span>
+        <span class="release-tag">Précédente</span>
       </div>
       <div class="release-body">
         <div class="change-group">
