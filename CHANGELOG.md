@@ -2,6 +2,11 @@
 
 All notable changes to Sodales are documented in this file.
 
+## 2026.09.022 (2026-09-21)
+
+### Fixes — CI guard test
+- The new CSP markup guard used `String.prototype.matchAll(...).map(...)` — `matchAll` returns an iterator, so the test crashed in CI (Node version dependent); it now spreads the iterator first. No application change.
+
 ## 2026.09.021 (2026-09-21)
 
 ### Security follow-up — file access model, trust proxy, CSP leftovers

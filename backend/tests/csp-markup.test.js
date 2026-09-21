@@ -72,7 +72,7 @@ describe('CSP — cohérence data-act / registre', () => {
 
   test('toutes les actions référencées existent', () => {
     const registre = fs.readFileSync(path.join(FE, 'js', 'csp-registry.js'), 'utf8');
-    const connues = new Set(registre.matchAll(/'([A-Za-z0-9_]+)'/g).map((m) => m[1]));
+    const connues = new Set([...registre.matchAll(/'([A-Za-z0-9_]+)'/g)].map((m) => m[1]));
     // toute action définie via ACT.x = … dans n'importe quel script de l'app
     for (const f of fichiers(path.join(FE, 'js'), '.js')) {
       const s = fs.readFileSync(f, 'utf8');
