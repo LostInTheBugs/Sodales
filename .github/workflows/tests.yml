@@ -32,7 +32,7 @@ jobs:
       PG_SUPER_URL: postgres://rpg:rpg@127.0.0.1:5432/postgres
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 20
           cache: npm
