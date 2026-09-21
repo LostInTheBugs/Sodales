@@ -106,13 +106,33 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:.
 
   <div class="timeline">
 
-    <!-- 2026.09.010 — Actuelle -->
+    <!-- 2026.09.011 — Actuelle -->
     <div class="release latest">
+      <div class="release-dot"></div>
+      <div class="release-head">
+        <span class="release-version">2026.09.011</span>
+        <span class="release-date">Septembre 2026</span>
+        <span class="release-tag tag-latest">Actuelle</span>
+      </div>
+      <div class="release-body">
+        <div class="change-group">
+          <div class="change-group-title">Qualité de code — découpage de game.html (terminé)</div>
+          <ul class="change-list">
+            <li class="improve"><strong>game.html : 11 072 → 2 430 lignes</strong> — il ne reste que le CSS, le HTML et un socle de ~260 lignes (état, garde d'authentification, chargement de campagne)</li>
+            <li class="improve"><strong>25 modules dans <code>js/game/</code></strong> (~8 850 lignes) — carte, jetons, brouillard, murs et lumières, dés, chat, fiche, PNJ, audio, combat, objets, raccourcis…</li>
+            <li class="improve"><strong>Sans changement de comportement</strong> — déplacements verbatim (recensements identiques à chaque étape), sessions navigateur réelles sans aucune erreur JS sur toutes les fonctions majeures</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2026.09.010 -->
+    <div class="release">
       <div class="release-dot"></div>
       <div class="release-head">
         <span class="release-version">2026.09.010</span>
         <span class="release-date">Septembre 2026</span>
-        <span class="release-tag tag-latest">Actuelle</span>
+        <span class="release-tag">Précédente</span>
       </div>
       <div class="release-body">
         <div class="change-group">

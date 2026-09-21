@@ -2,6 +2,14 @@
 
 All notable changes to Sodales are documented in this file.
 
+## 2026.09.011 (2026-09-21)
+
+### Refactor — game.html modularization (step 4, final)
+- Extracted ~2,430 more lines from `game.html` (4,839 → 2,430) into seven modules: `js/game/socket-events.js`, `js/game/audio-player.js` (procedural ambiences, queue, playlists, upload), `js/game/map-presets.js`, `js/game/combat-tracker.js`, `js/game/item-picker.js`, `js/game/gm-tools.js`, `js/game/socket-listeners.js`.
+- And before them (steps 3-4 of today): map interactions, map tools, walls, lighting, vision/fog, map settings/UVTT.
+- Final state: `game.html` went from **11,072 lines to 2,430** (CSS + HTML + a ~260-line bootstrap shell: state, auth guard, campaign loading); the app logic now lives in **25 modules** under `js/game/` (~8,850 lines).
+- Verbatim moves throughout (function census identical at each step), 0 JS errors in real browser sessions — map, tokens, fog, chat, dice, character sheet, NPC library, audio panel, combat tracker, item picker all exercised.
+
 ## 2026.09.010 (2026-09-21)
 
 ### Refactor — game.html modularization (step 3, map layer)
