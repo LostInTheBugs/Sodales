@@ -2,6 +2,15 @@
 
 All notable changes to Sodales are documented in this file.
 
+## 2026.09.016 (2026-09-21)
+
+### Fixes — all hidden-token leaks closed, centralised in one helper
+- New `emitToken(campaignId, token, event, payload, opts)` helper: an invisible token is emitted **to GMs only**. Every token-related event goes through it now — `token_moved`, `token_created`, `token_deleted`, `token_hp_updated`, `token_conditions_updated` — plus the per-recipient `map_changed` (015).
+- `token_move`, `token_hp` and `token_delete` now read the token's visibility with the same write and emit nothing if the row is not in the campaign.
+- `token_conditions` verifies the token belongs to the campaign before broadcasting.
+- The role is also stored in `socket.data.role`, so the GM filter keeps working with a multi-node adapter (Redis), where `fetchSockets()` only returns `socket.data`.
+- 3 new socket tests (61 total in CI); the new tests were verified to **fail without the fix** (3 failures) and pass with it.
+
 ## 2026.09.015 (2026-09-21)
 
 ### Tests — coverage beyond authorization + two hidden-token leaks fixed

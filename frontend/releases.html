@@ -107,13 +107,35 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:.
 
   <div class="timeline">
 
-    <!-- 2026.09.015 — Actuelle -->
+    <!-- 2026.09.016 — Actuelle -->
     <div class="release latest">
+      <div class="release-dot"></div>
+      <div class="release-head">
+        <span class="release-version">2026.09.016</span>
+        <span class="release-date">Septembre 2026</span>
+        <span class="release-tag tag-latest">Actuelle</span>
+      </div>
+      <div class="release-body">
+        <div class="change-group">
+          <div class="change-group-title">Jetons invisibles : toutes les fuites fermées, en un seul endroit</div>
+          <ul class="change-list">
+            <li class="fix"><strong>Déplacement d'un jeton caché</strong> — n'est plus diffusé aux joueurs (on pouvait suivre un monstre caché en lisant le trafic)</li>
+            <li class="fix"><strong>PV et états d'un jeton caché</strong> — diffusés aux MJ uniquement</li>
+            <li class="fix"><strong>Création et suppression</strong> — diffusion réservée aux MJ pour un jeton invisible</li>
+            <li class="improve"><strong>Règle centralisée</strong> — un seul helper <code>emitToken()</code> gère la visibilité : tout nouvel événement de jeton passera par la même règle</li>
+            <li class="improve">3 nouveaux tests (61 au total) — vérifiés comme échouant <em>sans</em> le correctif</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2026.09.015 -->
+    <div class="release">
       <div class="release-dot"></div>
       <div class="release-head">
         <span class="release-version">2026.09.015</span>
         <span class="release-date">Septembre 2026</span>
-        <span class="release-tag tag-latest">Actuelle</span>
+        <span class="release-tag">Précédente</span>
       </div>
       <div class="release-body">
         <div class="change-group">

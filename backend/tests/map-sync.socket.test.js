@@ -141,6 +141,67 @@ describe('Jetons — déplacement, propriété, persistance', () => {
     const pos = await posOf(tokNpc);
     assert.equal(pos.x, 300);
   });
+
+  test('un jeton invisible déplacé par le MJ n\'est pas diffusé aux joueurs', async () => {
+    const gm = await join(gmToken, campaignA);
+    const gmListener = await join(gmToken, campaignA); // 2e socket MJ : témoin de la diffusion
+    const player = await join(playerToken, campaignA);
+    const seenPlayer = collect(player);
+    // l'émetteur est exclu de sa propre diffusion ; un autre socket MJ, lui, doit recevoir
+    const gmGot = H.once(gmListener, 'token_moved', { timeoutMs: 6000 });
+    gm.emit('token_move', { campaign_id: campaignA, map_id: mapA1, token_id: tokNpc, x: 310, y: 320 });
+    const forGm = await gmGot;
+    assert.equal(forGm.token_id, tokNpc, 'un autre socket MJ doit recevoir le déplacement');
+    await H.wait(800);
+    assert.equal(seenPlayer.length, 0, `le joueur ne doit rien apprendre du jeton caché : ${JSON.stringify(seenPlayer)}`);
+    const pos = await posOf(tokNpc);
+    assert.equal(pos.x, 310, 'le déplacement doit tout de même être persisté');
+
+    // contrôle positif : un jeton visible, lui, est bien diffusé aux joueurs
+    const playerGot = H.once(player, 'token_moved', { timeoutMs: 6000 });
+    gm.emit('token_move', { campaign_id: campaignA, map_id: mapA1, token_id: tokOther, x: 210, y: 220 });
+    assert.equal((await playerGot).token_id, tokOther);
+  });
+
+  test('PV et conditions d\'un jeton invisible : réservés aux MJ', async () => {
+    const gm = await join(gmToken, campaignA);
+    const player = await join(playerToken, campaignA);
+    const seenPlayer = collect(player);
+
+    const gmHp = H.once(gm, 'token_hp_updated', { timeoutMs: 6000 });
+    gm.emit('token_hp', { campaign_id: campaignA, token_id: tokNpc, hp_current: 7 });
+    assert.equal((await gmHp).hp_current, 7);
+
+    const gmCond = H.once(gm, 'token_conditions_updated', { timeoutMs: 6000 });
+    gm.emit('token_conditions', { campaign_id: campaignA, token_id: tokNpc, conditions: ['empoisonné'] });
+    assert.deepEqual((await gmCond).conditions, ['empoisonné']);
+
+    await H.wait(800);
+    assert.equal(seenPlayer.length, 0, `aucune information ne doit filtrer sur le jeton caché : ${JSON.stringify(seenPlayer)}`);
+
+    // contrôle positif : sur un jeton visible, les joueurs sont bien prévenus
+    const playerHp = H.once(player, 'token_hp_updated', { timeoutMs: 6000 });
+    gm.emit('token_hp', { campaign_id: campaignA, token_id: tokOwner, hp_current: 4 });
+    assert.equal((await playerHp).hp_current, 4);
+    const playerCond = H.once(player, 'token_conditions_updated', { timeoutMs: 6000 });
+    gm.emit('token_conditions', { campaign_id: campaignA, token_id: tokOwner, conditions: ['à terre'] });
+    assert.deepEqual((await playerCond).conditions, ['à terre']);
+  });
+
+  test('la suppression d\'un jeton invisible n\'est pas diffusée aux joueurs', async () => {
+    const gm = await join(gmToken, campaignA);
+    const player = await join(playerToken, campaignA);
+    const created = H.once(gm, 'token_created', { timeoutMs: 6000 });
+    gm.emit('token_create', { campaign_id: campaignA, map_id: mapA2, label: 'Piège', x: 5, y: 5, visible: false });
+    const hidden = await created;
+
+    const seenPlayer = collect(player);
+    const gmDel = H.once(gm, 'token_deleted', { timeoutMs: 6000 });
+    gm.emit('token_delete', { campaign_id: campaignA, token_id: hidden.id });
+    await gmDel;
+    await H.wait(700);
+    assert.equal(seenPlayer.length, 0, `la suppression doit rester invisible : ${JSON.stringify(seenPlayer)}`);
+  });
 });
 
 describe('Carte — changement et filtrage des jetons invisibles', () => {

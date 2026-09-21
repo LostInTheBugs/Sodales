@@ -49,6 +49,34 @@ function scoped(handler, { gmOnly = false } = {}) {
 
 module.exports = function setupSocket(io) {
 
+  /**
+   * Émission liée à un jeton, filtrée selon sa visibilité : un jeton invisible
+   * ne part QUE vers les MJ — les joueurs ne doivent ni le voir, ni recevoir
+   * son identifiant ou sa position. Centralisé ici pour que tout nouvel
+   * événement concernant un jeton passe par la même règle.
+   *
+   * @param {string} campaignId
+   * @param {{visible?: boolean}} token  ligne du jeton (visible:false → MJ seuls)
+   * @param {string} event
+   * @param {object} payload
+   * @param {{excludeSender?: import('socket.io').Socket}} [opts] exclure l'émetteur
+   *        (équivalent de l'ancien socket.to(room), l'émetteur a déjà l'état local)
+   */
+  async function emitToken(campaignId, token, event, payload, opts = {}) {
+    const { excludeSender = null } = opts;
+    if (token && token.visible === false) {
+      for (const dest of await io.in(campaignId).fetchSockets()) {
+        if (excludeSender && dest.id === excludeSender.id) continue;
+        // data.role (et non role) : un adaptateur multi-nœuds ne transmet que socket.data
+        if (dest.data?.role === 'gm') dest.emit(event, payload);
+      }
+    } else if (excludeSender) {
+      excludeSender.to(campaignId).emit(event, payload);
+    } else {
+      io.to(campaignId).emit(event, payload);
+    }
+  }
+
   // ── Auth middleware Socket.io ──────────────────────────────
   io.use(async (socket, next) => {
     const token = socket.handshake.auth?.token;
@@ -83,6 +111,7 @@ module.exports = function setupSocket(io) {
         socket.join(campaign_id);
         socket.campaignId = campaign_id;
         socket.role = m.rows[0].role;
+        socket.data.role = m.rows[0].role; // lisible via fetchSockets() (adaptateurs multi-nœuds)
 
         // Charger les 50 derniers messages
         const msgs = await db.query(
@@ -288,11 +317,14 @@ module.exports = function setupSocket(io) {
           // Token sans personnage (PNJ) ou personnage d'un autre joueur → refus silencieux
           if (!row || !row.char_user_id || row.char_user_id !== socket.user.id) return;
         }
-        await db.query(
+        const moved = await db.query(
           `UPDATE tokens SET x = $1, y = $2, facing = COALESCE($4, facing)
-           FROM maps WHERE tokens.id = $3 AND tokens.map_id = maps.id AND maps.campaign_id = $5`,
+           FROM maps WHERE tokens.id = $3 AND tokens.map_id = maps.id AND maps.campaign_id = $5
+           RETURNING tokens.visible`,
           [x, y, token_id, facing ?? null, cid]);
-        socket.to(campaign_id).emit('token_moved', { token_id, x, y, facing, moved_by: socket.user.id });
+        if (!moved.rows[0]) return; // jeton inexistant dans cette campagne : rien à diffuser
+        await emitToken(cid, moved.rows[0], 'token_moved',
+          { token_id, x, y, facing, moved_by: socket.user.id }, { excludeSender: socket });
       } catch (err) {
         console.error('[WS] token_move error:', err);
       }
@@ -334,15 +366,8 @@ module.exports = function setupSocket(io) {
             token.char_vision_angle  = c.rows[0].vision_angle  || 360;
           }
         }
-        // Un jeton invisible (visible:false) ne part que vers les MJ — même
-        // règle que map_change et que le chargement initial de campagne.
-        if (token.visible === false) {
-          for (const dest of await io.in(campaign_id).fetchSockets()) {
-            if (dest.role === 'gm') dest.emit('token_created', token);
-          }
-        } else {
-          io.to(campaign_id).emit('token_created', token);
-        }
+        // Jeton invisible (visible:false) : diffusion réservée aux MJ (emitToken)
+        await emitToken(campaign_id, token, 'token_created', token);
       } catch (err) {
         console.error('[WS] token_create error:', err);
       }
@@ -351,10 +376,11 @@ module.exports = function setupSocket(io) {
     // ── Supprimer un token (MJ) ───────────────────────────
     socket.on('token_delete', scoped(async ({ campaign_id, token_id }, cid) => {
       try {
-        await db.query(
-          'DELETE FROM tokens USING maps WHERE tokens.id = $1 AND tokens.map_id = maps.id AND maps.campaign_id = $2',
+        const del = await db.query(
+          'DELETE FROM tokens USING maps WHERE tokens.id = $1 AND tokens.map_id = maps.id AND maps.campaign_id = $2 RETURNING tokens.visible',
           [token_id, cid]);
-        io.to(campaign_id).emit('token_deleted', { token_id });
+        if (!del.rows[0]) return;
+        await emitToken(cid, del.rows[0], 'token_deleted', { token_id });
       } catch (err) {
         console.error('[WS] token_delete error:', err);
       }
@@ -382,7 +408,7 @@ module.exports = function setupSocket(io) {
         );
         const mapChanged = { map: map.rows[0], tokens: tokens.rows };
         for (const dest of await io.in(campaign_id).fetchSockets()) {
-          dest.emit('map_changed', dest.role === 'gm'
+          dest.emit('map_changed', dest.data?.role === 'gm'
             ? mapChanged
             : { map: mapChanged.map, tokens: mapChanged.tokens.filter((t) => t.visible) });
         }
@@ -463,8 +489,12 @@ module.exports = function setupSocket(io) {
     }, { gmOnly: true }));
 
     // ── CONDITIONS DE STATUT ──────────────────────────────────
-    socket.on('token_conditions', scoped(({ campaign_id, token_id, conditions }) => {
-      io.to(campaign_id).emit('token_conditions_updated', { token_id, conditions });
+    socket.on('token_conditions', scoped(async ({ campaign_id, token_id, conditions }, cid) => {
+      const t = await db.query(
+        'SELECT t.visible FROM tokens t JOIN maps m ON m.id = t.map_id WHERE t.id = $1 AND m.campaign_id = $2',
+        [token_id, cid]);
+      if (!t.rows[0]) return;
+      await emitToken(cid, t.rows[0], 'token_conditions_updated', { token_id, conditions });
     }, { gmOnly: true }));
 
     // ── PING DE CARTE ─────────────────────────────────────────
@@ -619,10 +649,11 @@ module.exports = function setupSocket(io) {
     // ── HP token (MJ) ────────────────────────────────────────
     socket.on('token_hp', scoped(async ({ campaign_id, token_id, hp_current }, cid) => {
       try {
-        await db.query(
-          'UPDATE tokens SET hp_current=$1 FROM maps WHERE tokens.id=$2 AND tokens.map_id = maps.id AND maps.campaign_id = $3',
+        const hp = await db.query(
+          'UPDATE tokens SET hp_current=$1 FROM maps WHERE tokens.id=$2 AND tokens.map_id = maps.id AND maps.campaign_id = $3 RETURNING tokens.visible',
           [hp_current, token_id, cid]);
-        io.to(campaign_id).emit('token_hp_updated', { token_id, hp_current });
+        if (!hp.rows[0]) return;
+        await emitToken(campaign_id, hp.rows[0], 'token_hp_updated', { token_id, hp_current });
       } catch (err) { console.error('[WS] token_hp error:', err); }
     }, { gmOnly: true }));
 
