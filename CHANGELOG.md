@@ -2,6 +2,13 @@
 
 All notable changes to Sodales are documented in this file.
 
+## 2026.09.018 (2026-09-21)
+
+### Removals — Star Wars / The Lord of the Rings systems, and per-character videos
+- The `Star Wars` and `Le Seigneur des Anneaux` systems are removed from the app: definitions, race/class image maps, selectors and map presets, along with their media (60 files, ~11 MB).
+- Per-character animation videos (`*-i2v.mp4`, `*-grok.mp4`; 94 files, ~22 MB) are removed — the "Animation" link in the character picker simply stays hidden when the file is absent (portraits, GIFs and system intros are untouched).
+- New media bundle `assets-2026.10` (248 files, 65 MB instead of 95 MB) with its pinned SHA-256; `fetch-assets.sh` now pins version 2026.10.
+
 ## 2026.09.017 (2026-09-21)
 
 ### Internal — no code path depends on the single-process socket map anymore

@@ -6,12 +6,12 @@
 // Tags système pour les cartes prédéfinies
 // Permet de trier les cartes par pertinence selon le système de campagne
 const MAP_SYSTEM_TAGS = {
-  fantasy:  ['D&D 5e','Pathfinder 2e','Warhammer Fantasy','Le Seigneur des Anneaux','Savage Worlds'],
+  fantasy:  ['D&D 5e','Pathfinder 2e','Warhammer Fantasy','Savage Worlds'],
   desert:   ['Dune','Savage Worlds'],
   urban:    ['Cyberpunk Red','Shadowrun','Vampire: The Masquerade','Tomorrow City','Call of Cthulhu'],
-  forest:   ['D&D 5e','Pathfinder 2e','Le Seigneur des Anneaux','Savage Worlds','Warhammer Fantasy'],
-  dungeon:  ['D&D 5e','Pathfinder 2e','Warhammer Fantasy','Le Seigneur des Anneaux','Paranoia'],
-  space:    ['Starfinder','Star Wars','Cyberpunk Red'],
+  forest:   ['D&D 5e','Pathfinder 2e','Savage Worlds','Warhammer Fantasy'],
+  dungeon:  ['D&D 5e','Pathfinder 2e','Warhammer Fantasy','Paranoia'],
+  space:    ['Starfinder','Cyberpunk Red'],
   horror:   ['Call of Cthulhu','Vampire: The Masquerade','Paranoia','Warhammer Fantasy'],
   tavern:   ['D&D 5e','Pathfinder 2e','Warhammer Fantasy','Savage Worlds','Cyberpunk Red'],
 };

@@ -70,8 +70,8 @@ function render() {
             <option value="Starfinder"/><option value="Shadowrun"/>
             <option value="Vampire: The Masquerade"/><option value="Cyberpunk Red"/>
             <option value="Savage Worlds"/><option value="Cats! La Mascarade"/>
-            <option value="Dune"/><option value="Star Wars"/>
-            <option value="Le Seigneur des Anneaux"/><option value="Paranoia"/>
+            <option value="Dune"/>
+            <option value="Paranoia"/>
             <option value="Tomorrow City"/><option value="Autre"/>
           </datalist>
         </div>

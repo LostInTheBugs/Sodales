@@ -18,12 +18,12 @@ cd "$(dirname "$0")"
 
 # ── Version des médias attendue par cette révision du dépôt ──
 # (mettre à jour ces deux lignes à chaque nouvelle release d'assets)
-ASSETS_VERSION_DEFAULT="2026.09"
-SHA_2026_09="09b8c7d690a3016c5ccc67746bf155950f42ad12e07638e6a54f2d285bb13b9e"
+ASSETS_VERSION_DEFAULT="2026.10"
+SHA_2026_10="1c21955da634416e747b6a8fc8755603def6d602ec2c825fe674c5ec7817e554"
 
 VERSION="${SODALES_ASSETS_VERSION:-$ASSETS_VERSION_DEFAULT}"
 case "$VERSION" in
-  2026.09) SHA_DEFAULT="$SHA_2026_09" ;;
+  2026.10) SHA_DEFAULT="$SHA_2026_10" ;;
   *)       SHA_DEFAULT="" ;;
 esac
 URL="${SODALES_ASSETS_URL:-https://github.com/LostInTheBugs/Sodales/releases/download/assets-${VERSION}/sodales-assets-${VERSION}.tar.gz}"
