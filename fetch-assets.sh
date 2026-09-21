@@ -44,7 +44,7 @@ if [ -z "$SHA" ]; then
   exit 1
 fi
 
-echo "[assets] Téléchargement des médias ${VERSION} (~95 Mo) depuis la release assets..."
+echo "[assets] Téléchargement des médias ${VERSION} depuis la release assets..."
 TMP="$(mktemp /tmp/sodales-assets.XXXXXX.tar.gz)"
 trap 'rm -f "$TMP"' EXIT
 if command -v curl >/dev/null 2>&1; then
