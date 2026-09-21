@@ -91,7 +91,7 @@ MAPS_CHANGED=false
 
 echo "$CHANGED" | grep -q "^backend/"      && BACKEND_CHANGED=true
 echo "$CHANGED" | grep -q "^frontend/"     && FRONTEND_CHANGED=true
-echo "$CHANGED" | grep -q "^backend/schema.sql" && SCHEMA_CHANGED=true
+echo "$CHANGED" | grep -q "^backend/migrations/" && SCHEMA_CHANGED=true
 echo "$CHANGED" | grep -q "^frontend/maps/" && MAPS_CHANGED=true
 
 echo -e "  Backend  : $($BACKEND_CHANGED  && echo "${YELLOW}modifié${NC}" || echo "inchangé")"
@@ -131,20 +131,12 @@ if $MAPS_CHANGED && [[ -d frontend/maps ]]; then
   [[ $COPIED -gt 0 ]] && success "${COPIED} nouvelle(s) carte(s) par défaut ajoutée(s)."
 fi
 
-# ── 9. Migration du schéma DB ─────────────────────────────────
+# ── 9. Migrations de base de données ──────────────────────────
 if $SCHEMA_CHANGED; then
-  info "Migration du schéma de base de données..."
-  if [[ "${COMPOSE_PROFILES:-}" == *db* ]] || docker compose -p "$COMPOSE_PROJECT" -f "$COMPOSE_FILE" ps -q rpg-db &>/dev/null; then
-    docker compose -p "$COMPOSE_PROJECT" -f "$COMPOSE_FILE" exec -T rpg-db psql -U rpg rpg < backend/schema.sql 2>/dev/null \
-      && success "Schéma migré." \
-      || warn "Migration partielle — vérifiez les logs."
-  elif command -v psql &>/dev/null && [[ -n "${DATABASE_URL:-}" ]]; then
-    PGCONNECT_TIMEOUT=5 psql "$DATABASE_URL" -f backend/schema.sql 2>/dev/null \
-      && success "Schéma migré." \
-      || warn "Migration impossible. Appliquez backend/schema.sql manuellement."
-  else
-    warn "psql non disponible. Appliquez backend/schema.sql manuellement."
-  fi
+  info "Application des migrations de base de données..."
+  docker compose -p "$COMPOSE_PROJECT" -f "$COMPOSE_FILE" exec -T rpg node migrations/run.js 2>/dev/null \
+    && success "Base à jour." \
+    || warn "Migrations non appliquées maintenant — elles s'appliqueront au prochain démarrage du serveur."
 fi
 
 # ── 9 bis. Médias hors dépôt (si absents de ce clone) ──────────

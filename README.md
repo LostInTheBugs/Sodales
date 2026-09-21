@@ -55,7 +55,7 @@ The script asks three questions at startup:
 
 **Database** — two options:
 - Built-in PostgreSQL (Docker) — no configuration required
-- Existing PostgreSQL (local or remote) — you provide the connection URL; the schema is applied automatically if `psql` is available
+- Existing PostgreSQL (local or remote) — you provide the connection URL; the numbered migrations are applied automatically (at install, at update, and at server start)
 
 The script then automatically generates the secrets (JWT, DB password) and starts the application.
 
@@ -140,7 +140,7 @@ Current version: **2026.09.001**
 │   ├── routes/       — REST endpoints
 │   ├── socket/       — Real-time handlers
 │   ├── middleware/   — JWT auth
-│   └── schema.sql    — PostgreSQL schema
+│   └── migrations/   — numbered SQL migrations (applied automatically)
 ├── frontend/         — HTML/CSS/JS interface
 ├── nginx/            — nginx configuration (templates)
 ├── docs/             — Screenshots

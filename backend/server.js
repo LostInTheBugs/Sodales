@@ -57,10 +57,14 @@ app.use('/rpg/api/stats',                    require('./routes/stats'));
 
 // ── Init DB ──────────────────────────────────────────────────
 async function initDB() {
-  const schema = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
+  // Migrations numérotées (backend/migrations/NNN_*.sql) : idempotentes,
+  // sérialisées par verrou consultatif, compatibles bases existantes.
+  const { runMigrations } = require('./migrations/run');
   try {
-    await db.query(schema);
-    console.log('[DB] Schéma initialisé');
+    const { applied } = await runMigrations(db);
+    console.log(applied.length
+      ? `[DB] ${applied.length} migration(s) appliquée(s)`
+      : '[DB] Migrations à jour');
   } catch (err) {
     console.error('[DB] Erreur initialisation schéma:', err.message);
   }

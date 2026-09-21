@@ -10,9 +10,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
 <script src="/js/csp-actions.js?v=2"></script>
   <script src="/js/vendor/qrcode.min.js?v=2"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+  <script src="/js/vendor/three.min.js?v=1"></script>
+<script src="/js/vendor/marked.min.js?v=1"></script>
+<script src="/js/vendor/purify.min.js?v=1"></script>
 <script src="/js/items-weight.js?v=1"></script>
 <script defer src="/script.js" data-website-id="f30f0aac-dc25-407f-8f70-cc389c9df496"></script>
 <style>
@@ -1738,7 +1738,7 @@ body.table-mode .zone-subtoolbar{display:none !important;}
         <div class="fg">
           <label>Portrait</label>
           <div class="portrait-row">
-            <img id="mcs-portrait-preview" class="portrait-preview" src="" data-act="hideSelf" alt=""/>
+            <img id="mcs-portrait-preview" class="portrait-preview" src="" data-act="hideSelf" data-a='["$el"]' alt=""/>
             <div class="upload-field">
               <input type="url" id="mcs-portrait" placeholder="URL ou téléverser…" data-act="updatePortraitPreview"/>
               <label class="upload-file-btn" for="mcs-portrait-file" title="Téléverser">📎</label>
@@ -1924,7 +1924,7 @@ body.table-mode .zone-subtoolbar{display:none !important;}
   </div>
 </div>
 
-<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script src="/rpg/socket.io/socket.io.js"></script>
 <script src="/js/spells-db.js?v=2"></script>
 <script src="/js/spells-desc.js?v=1"></script>
 <script src="/js/items-db.js?v=1"></script>
@@ -1932,12 +1932,12 @@ body.table-mode .zone-subtoolbar{display:none !important;}
 <script src="/js/dice-styles.js?v=1"></script>
 <script src="/js/api.js?v=2"></script>
 <script src="/js/game/char-sidebar.js?v=2"></script>
-<script src="/js/game/chat.js?v=2"></script>
+<script src="/js/game/chat.js?v=3"></script>
 <script src="/js/game/dice.js?v=2"></script>
 <script src="/js/game/token-creator.js?v=2"></script>
 <script src="/js/game/npc-library.js?v=2"></script>
 <script src="/js/game/combo-select.js?v=2"></script>
-<script src="/js/game/sheet-rules.js?v=2"></script>
+<script src="/js/game/sheet-rules.js?v=3"></script>
 <script src="/js/game/map-extras.js?v=2"></script>
 <script src="/js/game/token-render.js?v=2"></script>
 <script src="/js/game/map-render.js?v=2"></script>
@@ -1950,7 +1950,7 @@ body.table-mode .zone-subtoolbar{display:none !important;}
 <script src="/js/game/map-vision.js?v=2"></script>
 <script src="/js/game/map-settings.js?v=2"></script>
 <script src="/js/game/socket-events.js?v=2"></script>
-<script src="/js/game/audio-player.js?v=2"></script>
+<script src="/js/game/audio-player.js?v=3"></script>
 <script src="/js/game/map-presets.js?v=3"></script>
 <script src="/js/game/combat-tracker.js?v=2"></script>
 <script src="/js/game/item-picker.js?v=2"></script>

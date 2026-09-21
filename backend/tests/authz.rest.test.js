@@ -14,7 +14,7 @@ let campaignId, campaignInvite, playerCharId, gmCharId;
 
 before(async () => {
   await H.resetDatabase();
-  server = await H.startServer();      // applique schema.sql sur la base jetable
+  server = await H.startServer();      // applique les migrations sur la base jetable
   users = await H.seedUsers();
 
   gm = H.makeApi(users['gm@test.local'].token);

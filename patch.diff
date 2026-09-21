@@ -1,0 +1,863 @@
+diff --git a/backend/socket/index.js b/backend/socket/index.js
+index f563f85..bf773dc 100755
+--- a/backend/socket/index.js
++++ b/backend/socket/index.js
+@@ -29,6 +29,20 @@ const nightModeStates = new Map();
+ // pc_mode / npc_mode : 'none' | 'bar' | 'exact'
+ const hpDisplayStates = new Map();
+ 
++// ── Helper d'autorisation Socket.io ─────────────────────────────
++// Ignore le campaign_id fourni par le client et utilise socket.campaignId.
++// @param {Function} handler - async function(payload, cid)
++// @param {Object} [opts]
++// @param {boolean} [opts.gmOnly=false] - restreindre au MJ
++function scoped(handler, { gmOnly = false } = {}) {
++  return async function (payload = {}) {
++    const cid = this.campaignId;          // établi par join_campaign
++    if (!cid) return;                     // join_campaign non appelé → silencieux
++    if (gmOnly && this.role !== 'gm') return;
++    return handler.call(this, { ...payload, campaign_id: cid }, cid);
++  };
++}
++
+ module.exports = function setupSocket(io) {
+ 
+   // ── Auth middleware Socket.io ──────────────────────────────
+@@ -182,23 +196,22 @@ module.exports = function setupSocket(io) {
+     });
+ 
+     // ── Annonce de combat (MJ) ───────────────────────────
+-    socket.on('combat_announce', ({ campaign_id, text }) => {
+-      if (socket.role !== 'gm') return;
++    socket.on('combat_announce', scoped(({ campaign_id, text }, cid) => {
+       if (!text?.trim()) return;
+-      io.to(campaign_id).emit('message_received', {
++      io.to(cid).emit('message_received', {
+         type: 'combat',
+         content: text.trim(),
+         username: socket.user.username,
+         created_at: new Date(),
+       });
+-    });
++    }, { gmOnly: true }));
+ 
+     // ── Chuchotement (message privé) ─────────────────────
+-    socket.on('whisper', async ({ campaign_id, to_username, content, character_name }) => {
++    socket.on('whisper', scoped(async ({ campaign_id, to_username, content, character_name }, cid) => {
+       if (!content?.trim() || !to_username) return;
+       try {
+         // Trouver le socket destinataire dans la campagne
+-        const roomSockets = await io.in(campaign_id).fetchSockets();
++        const roomSockets = await io.in(cid).fetchSockets();
+         const targetSocket = roomSockets.find(s => s.user.username.toLowerCase() === to_username.toLowerCase());
+         const now = new Date();
+         const whisperData = {
+@@ -222,7 +235,7 @@ module.exports = function setupSocket(io) {
+           }
+         });
+       } catch (err) { console.error('[WS] whisper error:', err); }
+-    });
++    }));
+ 
+     // ── Lancer de dés ─────────────────────────────────────
+     socket.on('dice_roll', async ({ campaign_id, dice, character_name, modifier, macro_name, label }) => {
+@@ -252,7 +265,7 @@ module.exports = function setupSocket(io) {
+     });
+ 
+     // ── Déplacer un token ─────────────────────────────────
+-    socket.on('token_move', async ({ campaign_id, map_id, token_id, x, y, facing }) => {
++    socket.on('token_move', scoped(async ({ map_id, token_id, x, y, facing }, cid) => {
+       try {
+         // Ownership check : le MJ peut tout bouger, un joueur seulement son token
+         if (socket.role !== 'gm') {
+@@ -266,30 +279,35 @@ module.exports = function setupSocket(io) {
+           // Token sans personnage (PNJ) ou personnage d'un autre joueur → refus silencieux
+           if (!row || !row.char_user_id || row.char_user_id !== socket.user.id) return;
+         }
+-        await db.query('UPDATE tokens SET x = $1, y = $2, facing = COALESCE($4, facing) WHERE id = $3',
+-          [x, y, token_id, facing ?? null]);
+-        socket.to(campaign_id).emit('token_moved', { token_id, x, y, facing, moved_by: socket.user.id });
++        // Clause de rattachement : le token doit appartenir à une carte de la campagne
++        await db.query(
++          `UPDATE tokens SET x = $1, y = $2, facing = COALESCE($4, facing)
++           FROM maps WHERE tokens.id = $3 AND tokens.map_id = maps.id AND maps.campaign_id = $5`,
++          [x, y, token_id, facing ?? null, cid]);
++        socket.to(cid).emit('token_moved', { token_id, x, y, facing, moved_by: socket.user.id });
+       } catch (err) {
+         console.error('[WS] token_move error:', err);
+       }
+-    });
++    }));
+ 
+     // ── Réassigner un personnage à un autre joueur (MJ uniquement) ─
+-    socket.on('token_reassign', async ({ campaign_id, character_id, new_user_id }) => {
+-      if (socket.role !== 'gm') return;
++    socket.on('token_reassign', scoped(async ({ character_id, new_user_id }, cid) => {
+       try {
+-        await db.query('UPDATE characters SET user_id = $1 WHERE id = $2', [new_user_id, character_id]);
++        await db.query('UPDATE characters SET user_id = $1 WHERE id = $2 AND campaign_id = $3',
++          [new_user_id, character_id, cid]);
+         // Mettre à jour char_user_id sur tous les tokens liés à ce personnage
+-        io.to(campaign_id).emit('character_reassigned', { character_id, new_user_id });
++        io.to(cid).emit('character_reassigned', { character_id, new_user_id });
+       } catch (err) {
+         console.error('[WS] token_reassign error:', err);
+       }
+-    });
++    }, { gmOnly: true }));
+ 
+     // ── Créer un token (MJ) ───────────────────────────────
+-    socket.on('token_create', async ({ campaign_id, map_id, label, x, y, color, character_id, size, image_url, hp_current, hp_max }) => {
+-      if (socket.role !== 'gm') return;
++    socket.on('token_create', scoped(async ({ map_id, label, x, y, color, character_id, size, image_url, hp_current, hp_max }, cid) => {
+       try {
++        // Vérifier que la carte appartient bien à la campagne
++        const mapCheck = await db.query('SELECT id FROM maps WHERE id = $1 AND campaign_id = $2', [map_id, cid]);
++        if (!mapCheck.rows[0]) return;
+         const r = await db.query(
+           `INSERT INTO tokens (map_id, character_id, label, x, y, color, size, image_url, hp_current, hp_max)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
+@@ -307,208 +325,196 @@ module.exports = function setupSocket(io) {
+             token.char_vision_angle  = c.rows[0].vision_angle  || 360;
+           }
+         }
+-        io.to(campaign_id).emit('token_created', token);
++        io.to(cid).emit('token_created', token);
+       } catch (err) {
+         console.error('[WS] token_create error:', err);
+       }
+-    });
++    }, { gmOnly: true }));
+ 
+     // ── Supprimer un token (MJ) ───────────────────────────
+-    socket.on('token_delete', async ({ campaign_id, token_id }) => {
+-      if (socket.role !== 'gm') return;
++    socket.on('token_delete', scoped(async ({ token_id }, cid) => {
+       try {
+-        await db.query('DELETE FROM tokens WHERE id = $1', [token_id]);
+-        io.to(campaign_id).emit('token_deleted', { token_id });
++        await db.query('DELETE FROM tokens USING maps WHERE tokens.id = $1 AND tokens.map_id = maps.id AND maps.campaign_id = $2',
++          [token_id, cid]);
++        io.to(cid).emit('token_deleted', { token_id });
+       } catch (err) {
+         console.error('[WS] token_delete error:', err);
+       }
+-    });
++    }, { gmOnly: true }));
+ 
+     // ── Changer la carte active (MJ) ──────────────────────
+-    socket.on('map_change', async ({ campaign_id, map_id }) => {
+-      if (socket.role !== 'gm') return;
++    socket.on('map_change', scoped(async ({ map_id }, cid) => {
+       try {
+-        await db.query('UPDATE maps SET is_active = FALSE WHERE campaign_id = $1', [campaign_id]);
+-        await db.query('UPDATE maps SET is_active = TRUE WHERE id = $1', [map_id]);
+-        const map = await db.query('SELECT id,name,background_url,grid_size,width,height,is_active,fog_of_war,walls,lights FROM maps WHERE id = $1', [map_id]);
++        await db.query('UPDATE maps SET is_active = FALSE WHERE campaign_id = $1', [cid]);
++        await db.query('UPDATE maps SET is_active = TRUE WHERE id = $1 AND campaign_id = $2', [map_id, cid]);
++        const map = await db.query('SELECT id,name,background_url,grid_size,width,height,is_active,fog_of_war,walls,lights FROM maps WHERE id = $1 AND campaign_id = $2', [map_id, cid]);
+         const tokens = await db.query(
+           `SELECT t.*, c.name AS char_name, c.portrait_url AS char_portrait,
+                   c.user_id AS char_user_id, c.vision_radius AS char_vision_radius,
+                   c.vision_angle AS char_vision_angle,
+                   COALESCE(t.hp_max, c.hp_max) AS hp_max
+            FROM tokens t LEFT JOIN characters c ON c.id = t.character_id
+-           WHERE t.map_id = $1`, [map_id]
++           WHERE t.map_id = $1 AND (t.visible = TRUE OR $2 = 'gm')`, [map_id, socket.role]
+         );
+-        io.to(campaign_id).emit('map_changed', { map: map.rows[0], tokens: tokens.rows });
++        io.to(cid).emit('map_changed', { map: map.rows[0], tokens: tokens.rows });
+       } catch (err) {
+         console.error('[WS] map_change error:', err);
+       }
+-    });
++    }, { gmOnly: true }));
+ 
+     // ── AUDIO : Jouer ─────────────────────────────────────────
+-    socket.on('audio_play', ({ campaign_id, type, preset, url, track_name, loop, volume }) => {
+-      if (socket.role !== 'gm') return;
++    socket.on('audio_play', scoped(({ campaign_id, type, preset, url, track_name, loop, volume }, cid) => {
+       const state = { type, preset, url, track_name, loop: loop !== false, volume: volume ?? 0.7, playing: true };
+-      audioStates.set(campaign_id, state);
+-      io.to(campaign_id).emit('audio_state', state);
+-    });
++      audioStates.set(cid, state);
++      io.to(cid).emit('audio_state', state);
++    }, { gmOnly: true }));
+ 
+     // ── AUDIO : Stop ──────────────────────────────────────────
+-    socket.on('audio_stop', ({ campaign_id }) => {
+-      if (socket.role !== 'gm') return;
+-      audioStates.delete(campaign_id);
+-      io.to(campaign_id).emit('audio_stopped');
+-    });
++    socket.on('audio_stop', scoped(({}, cid) => {
++      audioStates.delete(cid);
++      io.to(cid).emit('audio_stopped');
++    }, { gmOnly: true }));
+ 
+     // ── AUDIO : Volume (MJ ajuste le volume global) ───────────
+-    socket.on('audio_volume', ({ campaign_id, volume }) => {
+-      if (socket.role !== 'gm') return;
+-      const state = audioStates.get(campaign_id);
++    socket.on('audio_volume', scoped(({ volume }, cid) => {
++      const state = audioStates.get(cid);
+       if (state) state.volume = volume;
+-      io.to(campaign_id).emit('audio_volume', { volume });
+-    });
++      io.to(cid).emit('audio_volume', { volume });
++    }, { gmOnly: true }));
+ 
+     // ── MODE NUIT ─────────────────────────────────────────────
+-    socket.on('night_mode_set', ({ campaign_id, enabled }) => {
+-      if (socket.role !== 'gm') return;
+-      nightModeStates.set(campaign_id, !!enabled);
+-      io.to(campaign_id).emit('night_mode_state', { enabled: !!enabled });
+-    });
++    socket.on('night_mode_set', scoped(({ enabled }, cid) => {
++      nightModeStates.set(cid, !!enabled);
++      io.to(cid).emit('night_mode_state', { enabled: !!enabled });
++    }, { gmOnly: true }));
+ 
+     // ── AFFICHAGE PV ─────────────────────────────────────────
+-    socket.on('hp_display_update', ({ campaign_id, pc_mode, npc_mode, threshold_high, threshold_low }) => {
+-      if (socket.role !== 'gm') return;
++    socket.on('hp_display_update', scoped(({ pc_mode, npc_mode, threshold_high, threshold_low }, cid) => {
+       const state = {
+         pc_mode:         ['none','bar','exact'].includes(pc_mode)  ? pc_mode  : 'bar',
+         npc_mode:        ['none','bar','exact'].includes(npc_mode) ? npc_mode : 'none',
+         threshold_high:  Math.max(1, Math.min(99, parseInt(threshold_high)  || 70)),
+         threshold_low:   Math.max(1, Math.min(99, parseInt(threshold_low)   || 30)),
+       };
+-      hpDisplayStates.set(campaign_id, state);
+-      io.to(campaign_id).emit('hp_display_state', state);
+-    });
++      hpDisplayStates.set(cid, state);
++      io.to(cid).emit('hp_display_state', state);
++    }, { gmOnly: true }));
+ 
+     // ── MÉTÉO / AMBIANCE ──────────────────────────────────────
+-    socket.on('weather_set', ({ campaign_id, type, intensity }) => {
+-      if (socket.role !== 'gm') return;
++    socket.on('weather_set', scoped(({ type, intensity }, cid) => {
+       const state = { type: type || 'none', intensity: intensity ?? 5 };
+-      weatherStates.set(campaign_id, state);
+-      io.to(campaign_id).emit('weather_state', state);
+-    });
++      weatherStates.set(cid, state);
++      io.to(cid).emit('weather_state', state);
++    }, { gmOnly: true }));
+ 
+     // ── BROUILLARD DE GUERRE ──────────────────────────────────
+-    socket.on('fog_reveal', async ({ campaign_id, map_id, circles }) => {
+-      if (socket.role !== 'gm') return;
+-      const key = `${campaign_id}:${map_id}`;
+-      const state = fogStates.get(key) || { circles: [], allRevealed: false };
+-      state.circles.push(...circles);
+-      fogStates.set(key, state);
+-      io.to(campaign_id).emit('fog_update', { map_id, circles: state.circles, allRevealed: state.allRevealed });
+-      try { await db.query('UPDATE maps SET fog_of_war=$1 WHERE id=$2', [JSON.stringify(state), map_id]); } catch {}
+-    });
++    socket.on('fog_reveal', scoped(async ({ map_id, circles }, cid) => {
++      try {
++        const key = `${cid}:${map_id}`;
++        const state = fogStates.get(key) || { circles: [], allRevealed: false };
++        state.circles.push(...circles);
++        fogStates.set(key, state);
++        io.to(cid).emit('fog_update', { map_id, circles: state.circles, allRevealed: state.allRevealed });
++        await db.query('UPDATE maps SET fog_of_war=$1 WHERE id=$2 AND campaign_id=$3', [JSON.stringify(state), map_id, cid]);
++      } catch {}
++    }, { gmOnly: true }));
+ 
+-    socket.on('fog_clear', async ({ campaign_id, map_id }) => {
+-      if (socket.role !== 'gm') return;
+-      const key = `${campaign_id}:${map_id}`;
+-      const state = { circles: [], allRevealed: true };
+-      fogStates.set(key, state);
+-      io.to(campaign_id).emit('fog_update', { map_id, circles: [], allRevealed: true });
+-      try { await db.query('UPDATE maps SET fog_of_war=$1 WHERE id=$2', [JSON.stringify(state), map_id]); } catch {}
+-    });
++    socket.on('fog_clear', scoped(async ({ map_id }, cid) => {
++      try {
++        const key = `${cid}:${map_id}`;
++        const state = { circles: [], allRevealed: true };
++        fogStates.set(key, state);
++        io.to(cid).emit('fog_update', { map_id, circles: [], allRevealed: true });
++        await db.query('UPDATE maps SET fog_of_war=$1 WHERE id=$2 AND campaign_id=$3', [JSON.stringify(state), map_id, cid]);
++      } catch {}
++    }, { gmOnly: true }));
+ 
+-    socket.on('fog_reset', async ({ campaign_id, map_id }) => {
+-      if (socket.role !== 'gm') return;
+-      const key = `${campaign_id}:${map_id}`;
+-      const state = { circles: [], allRevealed: false };
+-      fogStates.set(key, state);
+-      io.to(campaign_id).emit('fog_update', { map_id, circles: [], allRevealed: false });
+-      try { await db.query('UPDATE maps SET fog_of_war=$1 WHERE id=$2', [JSON.stringify(state), map_id]); } catch {}
+-    });
++    socket.on('fog_reset', scoped(async ({ map_id }, cid) => {
++      try {
++        const key = `${cid}:${map_id}`;
++        const state = { circles: [], allRevealed: false };
++        fogStates.set(key, state);
++        io.to(cid).emit('fog_update', { map_id, circles: [], allRevealed: false });
++        await db.query('UPDATE maps SET fog_of_war=$1 WHERE id=$2 AND campaign_id=$3', [JSON.stringify(state), map_id, cid]);
++      } catch {}
++    }, { gmOnly: true }));
+ 
+     // ── CONDITIONS DE STATUT ──────────────────────────────────
+-    socket.on('token_conditions', ({ campaign_id, token_id, conditions }) => {
+-      if (socket.role !== 'gm') return;
+-      io.to(campaign_id).emit('token_conditions_updated', { token_id, conditions });
+-    });
++    socket.on('token_conditions', scoped(({ token_id, conditions }, cid) => {
++      io.to(cid).emit('token_conditions_updated', { token_id, conditions });
++    }, { gmOnly: true }));
+ 
+     // ── PING DE CARTE ─────────────────────────────────────────
+     // N'importe quel membre peut pinger un endroit sur la carte
+-    socket.on('map_ping', ({ campaign_id, x, y }) => {
+-      if (!socket.user) return;
++    socket.on('map_ping', scoped(({ x, y }, cid) => {
+       // Broadcaster à tous les autres (pas l'émetteur — déjà affiché localement)
+-      socket.to(campaign_id).emit('map_ping', {
++      socket.to(cid).emit('map_ping', {
+         x, y,
+         username: socket.user.username,
+       });
+-    });
++    }));
+ 
+     // ── MESURE DE DISTANCE (partagée) ────────────────────────
+-    socket.on('measure_show', ({ campaign_id, points }) => {
+-      if (!socket.user) return;
+-      socket.to(campaign_id).emit('measure_show', {
++    socket.on('measure_show', scoped(({ points }, cid) => {
++      socket.to(cid).emit('measure_show', {
+         points,
+         username: socket.user.username,
+       });
+-    });
++    }));
+ 
+-    socket.on('measure_clear', ({ campaign_id }) => {
+-      if (!socket.user) return;
+-      socket.to(campaign_id).emit('measure_clear', {
++    socket.on('measure_clear', scoped(({}, cid) => {
++      socket.to(cid).emit('measure_clear', {
+         username: socket.user.username,
+       });
+-    });
++    }));
+ 
+     // ── DESSIN SUR LA CARTE ──────────────────────────────────
+-    socket.on('draw_stroke', async ({ campaign_id, map_id, stroke }) => {
+-      if (!socket.user) return;
++    socket.on('draw_stroke', scoped(async ({ map_id, stroke }, cid) => {
+       // Charger les drawings existants depuis la DB
+       try {
+-        const res = await db.query('SELECT drawings FROM maps WHERE id = $1', [map_id]);
++        const res = await db.query('SELECT drawings FROM maps WHERE id = $1 AND campaign_id = $2', [map_id, cid]);
+         if (!res.rows[0]) return;
+         let drawings = res.rows[0].drawings || [];
+         if (typeof drawings === 'string') drawings = JSON.parse(drawings);
+         drawings.push(stroke);
+-        await db.query('UPDATE maps SET drawings = $1 WHERE id = $2', [JSON.stringify(drawings), map_id]);
+-        socket.to(campaign_id).emit('draw_stroke', { stroke });
++        await db.query('UPDATE maps SET drawings = $1 WHERE id = $2 AND campaign_id = $3', [JSON.stringify(drawings), map_id, cid]);
++        socket.to(cid).emit('draw_stroke', { stroke });
+       } catch (err) {
+         console.error('[WS] draw_stroke error:', err);
+       }
+-    });
++    }, { gmOnly: true }));
+ 
+-    socket.on('draw_undo', async ({ campaign_id, map_id }) => {
+-      if (!socket.user) return;
++    socket.on('draw_undo', scoped(async ({ map_id }, cid) => {
+       try {
+-        const res = await db.query('SELECT drawings FROM maps WHERE id = $1', [map_id]);
++        const res = await db.query('SELECT drawings FROM maps WHERE id = $1 AND campaign_id = $2', [map_id, cid]);
+         if (!res.rows[0]) return;
+         let drawings = res.rows[0].drawings || [];
+         if (typeof drawings === 'string') drawings = JSON.parse(drawings);
+         if (drawings.length === 0) return;
+         const removed = drawings.pop();
+-        await db.query('UPDATE maps SET drawings = $1 WHERE id = $2', [JSON.stringify(drawings), map_id]);
+-        socket.to(campaign_id).emit('draw_undo', { removed });
++        await db.query('UPDATE maps SET drawings = $1 WHERE id = $2 AND campaign_id = $3', [JSON.stringify(drawings), map_id, cid]);
++        socket.to(cid).emit('draw_undo', { removed });
+       } catch (err) {
+         console.error('[WS] draw_undo error:', err);
+       }
+-    });
++    }, { gmOnly: true }));
+ 
+-    socket.on('draw_clear', async ({ campaign_id, map_id }) => {
+-      if (!socket.user) return;
++    socket.on('draw_clear', scoped(async ({ map_id }, cid) => {
+       try {
+-        await db.query('UPDATE maps SET drawings = $1 WHERE id = $2', ['[]', map_id]);
+-        socket.to(campaign_id).emit('draw_clear', {});
++        await db.query('UPDATE maps SET drawings = $1 WHERE id = $2 AND campaign_id = $3', ['[]', map_id, cid]);
++        socket.to(cid).emit('draw_clear', {});
+       } catch (err) {
+         console.error('[WS] draw_clear error:', err);
+       }
+-    });
++    }, { gmOnly: true }));
+ 
+     // ── CIBLAGE ──────────────────────────────────────────────
+     // Stocké en mémoire : { campaign_id: [{ from_token_id, to_token_id, player_id, player_name, revealed }] }
+     const campaignTargets = new Map();
+ 
+-    socket.on('set_target', ({ campaign_id, from_token_id, to_token_id, to_token_name }) => {
+-      if (!socket.user) return;
+-      if (!campaignTargets.has(campaign_id)) campaignTargets.set(campaign_id, []);
+-      const targets = campaignTargets.get(campaign_id);
++    socket.on('set_target', scoped(({ from_token_id, to_token_id, to_token_name }, cid) => {
++      if (!campaignTargets.has(cid)) campaignTargets.set(cid, []);
++      const targets = campaignTargets.get(cid);
+       // Supprimer l'ancienne cible du même joueur pour le même from_token
+       const idx = targets.findIndex(t => t.player_id === socket.user.id && t.from_token_id === from_token_id);
+       const target = { from_token_id, to_token_id, to_token_name: to_token_name || 'Inconnu', player_id: socket.user.id, player_name: socket.user.username, revealed: false };
+@@ -516,33 +522,32 @@ module.exports = function setupSocket(io) {
+       else targets.push(target);
+       // Envoyer au MJ toutes les cibles
+       if (socket.role === 'gm') {
+-        io.to(campaign_id).emit('targets_state', targets.map(t => ({ ...t, player_name: t.player_id === socket.user.id ? t.player_name : t.player_name })));
++        io.to(cid).emit('targets_state', targets.map(t => ({ ...t, player_name: t.player_id === socket.user.id ? t.player_name : t.player_name })));
+       } else {
+         // Joueur : voir ses propres cibles, le MJ voit tout
+         socket.emit('targets_state', targets.filter(t => t.player_id === socket.user.id || t.revealed));
+-        const gmSockets = [...io.sockets.adapter.rooms.get(campaign_id) || []]
++        const gmSockets = [...io.sockets.adapter.rooms.get(cid) || []]
+           .map(id => io.sockets.sockets.get(id)).filter(s => s?.role === 'gm');
+         gmSockets.forEach(gmSocket => gmSocket.emit('targets_state', targets));
+       }
+-    });
++    }));
+ 
+-    socket.on('clear_target', ({ campaign_id, from_token_id }) => {
+-      if (!socket.user) return;
+-      if (campaignTargets.has(campaign_id)) {
+-        const targets = campaignTargets.get(campaign_id);
++    socket.on('clear_target', scoped(({ from_token_id }, cid) => {
++      if (campaignTargets.has(cid)) {
++        const targets = campaignTargets.get(cid);
+         const cleared = targets.filter(t => !(t.player_id === socket.user.id && t.from_token_id === from_token_id));
+-        campaignTargets.set(campaign_id, cleared);
++        campaignTargets.set(cid, cleared);
+         // Notifier le MJ
+-        const gmSockets = [...io.sockets.adapter.rooms.get(campaign_id) || []]
++        const gmSockets = [...io.sockets.adapter.rooms.get(cid) || []]
+           .map(id => io.sockets.sockets.get(id)).filter(s => s?.role === 'gm');
+         gmSockets.forEach(gmSocket => gmSocket.emit('targets_state', cleared));
+         socket.emit('targets_state', cleared.filter(t => t.player_id === socket.user.id || t.revealed));
+       }
+-    });
++    }));
+ 
+-    socket.on('reveal_targets_on_roll', ({ campaign_id, from_token_id, dice_data }) => {
+-      if (!socket.user || !campaignTargets.has(campaign_id)) return;
+-      const targets = campaignTargets.get(campaign_id);
++    socket.on('reveal_targets_on_roll', scoped(({ from_token_id, dice_data }, cid) => {
++      if (!campaignTargets.has(cid)) return;
++      const targets = campaignTargets.get(cid);
+       // Trouver les cibles du joueur pour ce token
+       const playerTargets = targets.filter(t => t.player_id === socket.user.id && t.from_token_id === from_token_id);
+       for (const t of playerTargets) {
+@@ -551,66 +556,59 @@ module.exports = function setupSocket(io) {
+         t.revealed = true;
+       }
+       // Mettre à jour tous les joueurs
+-      const gmSockets = [...io.sockets.adapter.rooms.get(campaign_id) || []]
++      const gmSockets = [...io.sockets.adapter.rooms.get(cid) || []]
+         .map(id => io.sockets.sockets.get(id)).filter(s => s?.role === 'gm');
+       gmSockets.forEach(gmSocket => gmSocket.emit('targets_state', targets));
+-      socket.to(campaign_id).emit('targets_state', targets.filter(t => t.revealed));
++      socket.to(cid).emit('targets_state', targets.filter(t => t.revealed));
+       socket.emit('targets_state', targets.filter(t => t.player_id === socket.user.id || t.revealed));
+-    });
++    }));
+ 
+     // ── HANDOUTS (broadcast partage) ─────────────────────────
+-    socket.on('handout_share_broadcast', ({ campaign_id, handout }) => {
+-      if (socket.role !== 'gm') return;
+-      socket.to(campaign_id).emit('handout_shared', { handout });
+-    });
++    socket.on('handout_share_broadcast', scoped(({ handout }, cid) => {
++      socket.to(cid).emit('handout_shared', { handout });
++    }, { gmOnly: true }));
+ 
+-    socket.on('handout_unshare_broadcast', ({ campaign_id, handout_id }) => {
+-      if (socket.role !== 'gm') return;
+-      socket.to(campaign_id).emit('handout_unshared', { handout_id });
+-    });
++    socket.on('handout_unshare_broadcast', scoped(({ handout_id }, cid) => {
++      socket.to(cid).emit('handout_unshared', { handout_id });
++    }, { gmOnly: true }));
+ 
+-    socket.on('handout_deleted_broadcast', ({ campaign_id, handout_id }) => {
+-      if (socket.role !== 'gm') return;
+-      socket.to(campaign_id).emit('handout_deleted', { handout_id });
+-    });
++    socket.on('handout_deleted_broadcast', scoped(({ handout_id }, cid) => {
++      socket.to(cid).emit('handout_deleted', { handout_id });
++    }, { gmOnly: true }));
+ 
+     // ── ZONES DE SORTS ────────────────────────────────────────
+-    socket.on('zone_add', ({ campaign_id, zone }) => {
+-      if (!socket.user) return;
+-      io.to(campaign_id).emit('zone_added', { zone });
+-    });
++    socket.on('zone_add', scoped(({ zone }, cid) => {
++      io.to(cid).emit('zone_added', { zone });
++    }));
+ 
+-    socket.on('zone_remove', ({ campaign_id, zone_id }) => {
+-      if (!socket.user) return;
+-      io.to(campaign_id).emit('zone_removed', { zone_id });
+-    });
++    socket.on('zone_remove', scoped(({ zone_id }, cid) => {
++      io.to(cid).emit('zone_removed', { zone_id });
++    }));
+ 
+-    socket.on('zones_clear', ({ campaign_id }) => {
+-      if (!socket.user) return;
+-      io.to(campaign_id).emit('zones_cleared');
+-    });
++    socket.on('zones_clear', scoped(({}, cid) => {
++      io.to(cid).emit('zones_cleared');
++    }));
+ 
+-    socket.on('zone_move', ({ campaign_id, zone }) => {
+-      if (!socket.user) return;
+-      io.to(campaign_id).emit('zone_moved', { zone });
+-    });
++    socket.on('zone_move', scoped(({ zone }, cid) => {
++      io.to(cid).emit('zone_moved', { zone });
++    }));
+ 
+     // ── HP token (MJ) ────────────────────────────────────────
+-    socket.on('token_hp', async ({ campaign_id, token_id, hp_current }) => {
+-      if (socket.role !== 'gm') return;
++    socket.on('token_hp', scoped(async ({ token_id, hp_current }, cid) => {
+       try {
+-        await db.query('UPDATE tokens SET hp_current=$1 WHERE id=$2', [hp_current, token_id]);
+-        io.to(campaign_id).emit('token_hp_updated', { token_id, hp_current });
++        await db.query(
++          'UPDATE tokens SET hp_current=$1 FROM maps WHERE tokens.id=$2 AND tokens.map_id = maps.id AND maps.campaign_id = $3',
++          [hp_current, token_id, cid]);
++        io.to(cid).emit('token_hp_updated', { token_id, hp_current });
+       } catch (err) { console.error('[WS] token_hp error:', err); }
+-    });
++    }, { gmOnly: true }));
+ 
+     // ── COMBAT : Démarrer (MJ envoie uniquement les ennemis) ──
+-    socket.on('combat_start', async ({ campaign_id, combatants }) => {
+-      if (socket.role !== 'gm') return;
++    socket.on('combat_start', scoped(async ({ combatants }, cid) => {
+       const sorted = [...combatants].sort((a, b) => b.initiative - a.initiative);
+       const state = { combatants: sorted, current_turn: 0, round: 1 };
+-      combatStates.set(campaign_id, state);
+-      io.to(campaign_id).emit('combat_state', state);
++      combatStates.set(cid, state);
++      io.to(cid).emit('combat_state', state);
+ 
+       // Récupérer les personnages de la campagne pour savoir qui doit lancer son initiative
+       try {
+@@ -619,156 +617,146 @@ module.exports = function setupSocket(io) {
+            FROM characters c
+            JOIN campaign_members cm ON cm.campaign_id = c.campaign_id AND cm.user_id = c.user_id
+            WHERE c.campaign_id = $1`,
+-          [campaign_id]
++          [cid]
+         );
+-        io.to(campaign_id).emit('combat_roll_needed', { characters: chars.rows });
++        io.to(cid).emit('combat_roll_needed', { characters: chars.rows });
+       } catch {}
+ 
+-      io.to(campaign_id).emit('message_received', {
++      io.to(cid).emit('message_received', {
+         type: 'system', content: '⚔ Le combat commence ! Chaque joueur doit lancer son initiative.', created_at: new Date()
+       });
+-    });
++    }, { gmOnly: true }));
+ 
+     // ── COMBAT : Joueur soumet son initiative ─────────────
+-    socket.on('combat_roll_initiative', ({ campaign_id, combatant }) => {
+-      const state = combatStates.get(campaign_id);
++    socket.on('combat_roll_initiative', scoped(({ combatant }, cid) => {
++      const state = combatStates.get(cid);
+       if (!state) return;
+       // Vérifier que ce perso n'est pas déjà dans la liste
+       if (state.combatants.find(c => c.char_id === combatant.char_id)) return;
+       state.combatants.push(combatant);
+       state.combatants.sort((a, b) => b.initiative - a.initiative);
+-      io.to(campaign_id).emit('combat_state', state);
+-      io.to(campaign_id).emit('message_received', {
++      io.to(cid).emit('combat_state', state);
++      io.to(cid).emit('message_received', {
+         type: 'system',
+         content: `🎲 ${combatant.name} — Initiative : ${combatant.initiative}`,
+         created_at: new Date()
+       });
+-    });
++    }));
+ 
+     // ── COMBAT : Tour suivant ─────────────────────────────
+-    socket.on('combat_next', ({ campaign_id }) => {
+-      if (socket.role !== 'gm') return;
+-      const state = combatStates.get(campaign_id);
++    socket.on('combat_next', scoped(({}, cid) => {
++      const state = combatStates.get(cid);
+       if (!state) return;
+       state.current_turn++;
+       if (state.current_turn >= state.combatants.length) {
+         state.current_turn = 0;
+         state.round++;
+-        io.to(campaign_id).emit('message_received', {
++        io.to(cid).emit('message_received', {
+           type: 'system', content: `🔄 Round ${state.round}`, created_at: new Date()
+         });
+       }
+       const cur = state.combatants[state.current_turn];
+-      io.to(campaign_id).emit('combat_state', state);
+-      io.to(campaign_id).emit('message_received', {
++      io.to(cid).emit('combat_state', state);
++      io.to(cid).emit('message_received', {
+         type: 'system', content: `▶ Tour de ${cur.name}`, created_at: new Date()
+       });
+-    });
++    }, { gmOnly: true }));
+ 
+     // ── COMBAT : Tour précédent ───────────────────────────
+-    socket.on('combat_prev', ({ campaign_id }) => {
+-      if (socket.role !== 'gm') return;
+-      const state = combatStates.get(campaign_id);
++    socket.on('combat_prev', scoped(({}, cid) => {
++      const state = combatStates.get(cid);
+       if (!state) return;
+       state.current_turn--;
+       if (state.current_turn < 0) {
+         state.current_turn = state.combatants.length - 1;
+         state.round = Math.max(1, state.round - 1);
+       }
+-      io.to(campaign_id).emit('combat_state', state);
+-    });
++      io.to(cid).emit('combat_state', state);
++    }, { gmOnly: true }));
+ 
+     // ── COMBAT : Mise à jour HP ───────────────────────────
+-    socket.on('combat_hp', ({ campaign_id, combatant_id, hp }) => {
+-      const state = combatStates.get(campaign_id);
++    socket.on('combat_hp', scoped(({ combatant_id, hp }, cid) => {
++      const state = combatStates.get(cid);
+       if (!state) return;
+       const c = state.combatants.find(c => c.id === combatant_id);
+       if (c) c.hp = Math.max(0, Math.min(c.hp_max, hp));
+-      io.to(campaign_id).emit('combat_state', state);
++      io.to(cid).emit('combat_state', state);
+       // Sync DB si c'est un vrai personnage
+       if (c?.char_id) {
+-        db.query('UPDATE characters SET hp_current = $1 WHERE id = $2', [c.hp, c.char_id]).catch(() => {});
++        db.query('UPDATE characters SET hp_current = $1 WHERE id = $2 AND campaign_id = $3', [c.hp, c.char_id, cid]).catch(() => {});
+       }
+-    });
++    }, { gmOnly: true }));
+ 
+     // ── COMBAT : Ajouter un combattant (mid-fight) ────────
+-    socket.on('combat_add', ({ campaign_id, combatant }) => {
+-      if (socket.role !== 'gm') return;
+-      const state = combatStates.get(campaign_id);
++    socket.on('combat_add', scoped(({ combatant }, cid) => {
++      const state = combatStates.get(cid);
+       if (!state) return;
+       state.combatants.push(combatant);
+       state.combatants.sort((a, b) => b.initiative - a.initiative);
+-      io.to(campaign_id).emit('combat_state', state);
+-    });
++      io.to(cid).emit('combat_state', state);
++    }, { gmOnly: true }));
+ 
+     // ── COMBAT : Retirer un combattant ────────────────────
+-    socket.on('combat_remove', ({ campaign_id, combatant_id }) => {
+-      if (socket.role !== 'gm') return;
+-      const state = combatStates.get(campaign_id);
++    socket.on('combat_remove', scoped(({ combatant_id }, cid) => {
++      const state = combatStates.get(cid);
+       if (!state) return;
+       const idx = state.combatants.findIndex(c => c.id === combatant_id);
+       if (idx >= 0) {
+         state.combatants.splice(idx, 1);
+         if (state.current_turn >= state.combatants.length) state.current_turn = 0;
+       }
+-      io.to(campaign_id).emit('combat_state', state);
+-    });
++      io.to(cid).emit('combat_state', state);
++    }, { gmOnly: true }));
+ 
+     // ── COMBAT : Terminer ─────────────────────────────────
+-    socket.on('combat_end', ({ campaign_id }) => {
+-      if (socket.role !== 'gm') return;
+-      combatStates.delete(campaign_id);
+-      io.to(campaign_id).emit('combat_ended');
+-      io.to(campaign_id).emit('message_received', {
++    socket.on('combat_end', scoped(({}, cid) => {
++      combatStates.delete(cid);
++      io.to(cid).emit('combat_ended');
++      io.to(cid).emit('message_received', {
+         type: 'system', content: '🏳 Le combat est terminé.', created_at: new Date()
+       });
+-    });
++    }, { gmOnly: true }));
+ 
+     // ── MURS : Sauvegarder les segments de mur ────────────────────
+-    socket.on('walls_save', async ({ campaign_id, map_id, walls }) => {
+-      if (socket.role !== 'gm') return;
++    socket.on('walls_save', scoped(async ({ map_id, walls }, cid) => {
+       try {
+-        await db.query('UPDATE maps SET walls = $1 WHERE id = $2', [JSON.stringify(walls), map_id]);
+-        io.to(campaign_id).emit('walls_updated', { map_id, walls });
++        await db.query('UPDATE maps SET walls = $1 WHERE id = $2 AND campaign_id = $3', [JSON.stringify(walls), map_id, cid]);
++        io.to(cid).emit('walls_updated', { map_id, walls });
+       } catch (err) { console.error('[WS] walls_save error:', err); }
+-    });
++    }, { gmOnly: true }));
+ 
+     // ── LUMIÈRES : rétrocompatibilité ────────────────────────────
+-    socket.on('lights_save', async ({ campaign_id, map_id, lights }) => {
+-      if (socket.role !== 'gm') return;
++    socket.on('lights_save', scoped(async ({ map_id, lights }, cid) => {
+       try {
+-        await db.query('UPDATE maps SET lights = $1 WHERE id = $2', [JSON.stringify(lights), map_id]);
+-        io.to(campaign_id).emit('lights_updated', { map_id, lights });
++        await db.query('UPDATE maps SET lights = $1 WHERE id = $2 AND campaign_id = $3', [JSON.stringify(lights), map_id, cid]);
++        io.to(cid).emit('lights_updated', { map_id, lights });
+       } catch (err) { console.error('[WS] lights_save error:', err); }
+-    });
++    }, { gmOnly: true }));
+ 
+     // ── OBJETS : Sauvegarder les objets de la carte ───────────────
+-    socket.on('objects_save', async ({ campaign_id, map_id, objects }) => {
+-      if (socket.role !== 'gm') return;
++    socket.on('objects_save', scoped(async ({ map_id, objects }, cid) => {
+       try {
+-        await db.query('UPDATE maps SET objects = $1 WHERE id = $2', [JSON.stringify(objects), map_id]);
+-        io.to(campaign_id).emit('objects_updated', { map_id, objects });
++        await db.query('UPDATE maps SET objects = $1 WHERE id = $2 AND campaign_id = $3', [JSON.stringify(objects), map_id, cid]);
++        io.to(cid).emit('objects_updated', { map_id, objects });
+       } catch (err) { console.error('[WS] objects_save error:', err); }
+-    });
++    }, { gmOnly: true }));
+ 
+     // ── VISION : Changer le mode ('all' | 'character' | 'none') ──
+-    socket.on('vision_mode_set', ({ campaign_id, mode }) => {
+-      if (socket.role !== 'gm') return;
++    socket.on('vision_mode_set', scoped(({ mode }, cid) => {
+       const validModes = ['all', 'character', 'none'];
+       if (!validModes.includes(mode)) return;
+-      visionModeStates.set(campaign_id, mode);
+-      io.to(campaign_id).emit('vision_mode', { mode });
+-    });
++      visionModeStates.set(cid, mode);
++      io.to(cid).emit('vision_mode', { mode });
++    }, { gmOnly: true }));
+ 
+     // ── VISION : Mettre à jour la vision d'un personnage ──────────
+-    socket.on('character_vision_set', async ({ campaign_id, char_id, vision_radius }) => {
+-      if (socket.role !== 'gm') return;
++    socket.on('character_vision_set', scoped(async ({ char_id, vision_radius }, cid) => {
+       try {
+-        await db.query('UPDATE characters SET vision_radius = $1 WHERE id = $2', [vision_radius, char_id]);
++        await db.query('UPDATE characters SET vision_radius = $1 WHERE id = $2 AND campaign_id = $3', [vision_radius, char_id, cid]);
+         // Mettre à jour les tokens qui utilisent ce personnage sur la carte active
+         const activeMap = await db.query(
+           'SELECT id FROM maps WHERE campaign_id = $1 AND is_active = TRUE LIMIT 1',
+-          [campaign_id]
++          [cid]
+         );
+         if (activeMap.rows[0]) {
+           await db.query(
+@@ -776,11 +764,11 @@ module.exports = function setupSocket(io) {
+             [vision_radius, char_id, activeMap.rows[0].id]
+           ).catch(() => {}); // colonne cache optionnelle — ignore si inexistante
+         }
+-        io.to(campaign_id).emit('character_vision_updated', { char_id, vision_radius });
++        io.to(cid).emit('character_vision_updated', { char_id, vision_radius });
+       } catch (err) {
+         console.error('[WS] character_vision_set error:', err);
+       }
+-    });
++    }, { gmOnly: true }));
+ 
+     // ── Montée de niveau (D&D 5e) ─────────────────────────────
+ 
+@@ -981,8 +969,7 @@ module.exports = function setupSocket(io) {
+     }
+ 
+     // Joueur → demande montée de niveau (hp_method seulement, PAS de jet ici)
+-    socket.on('level_up_request', async ({ campaign_id, character_id, hp_method }) => {
+-      if (campaign_id !== socket.campaignId) return;
++    socket.on('level_up_request', scoped(async ({ campaign_id, character_id, hp_method }) => {
+       try {
+         const m = await db.query(
+           'SELECT role FROM campaign_members WHERE campaign_id=$1 AND user_id=$2',
+@@ -1047,11 +1034,10 @@ module.exports = function setupSocket(io) {
+       } catch (err) {
+         console.error('[WS] level_up_request error:', err);
+       }
+-    });
++    }));
+ 
+     // MJ → liste des demandes en attente
+-    socket.on('level_up_requests_list', async ({ campaign_id }) => {
+-      if (campaign_id !== socket.campaignId) return;
++    socket.on('level_up_requests_list', scoped(async ({ campaign_id }) => {
+       try {
+         const m = await db.query(
+           'SELECT role FROM campaign_members WHERE campaign_id=$1 AND user_id=$2',
+@@ -1085,11 +1071,10 @@ module.exports = function setupSocket(io) {
+       } catch (err) {
+         console.error('[WS] level_up_requests_list error:', err);
+       }
+-    });
++    }));
+ 
+     // MJ → approuve ou refuse
+-    socket.on('level_up_resolve', async ({ campaign_id, request_id, approved, reject_reason }) => {
+-      if (campaign_id !== socket.campaignId) return;
++    socket.on('level_up_resolve', scoped(async ({ campaign_id, request_id, approved, reject_reason }) => {
+       try {
+         const m = await db.query(
+           'SELECT role FROM campaign_members WHERE campaign_id=$1 AND user_id=$2',
+@@ -1114,7 +1099,7 @@ module.exports = function setupSocket(io) {
+         }
+ 
+         // ── Approbation : on récupère le perso et on calcule MAINTENANT ──
+-        const charQ = await db.query('SELECT * FROM characters WHERE id=$1', [req.character_id]);
++        const charQ = await db.query('SELECT * FROM characters WHERE id=$1 AND campaign_id=$2', [req.character_id, campaign_id]);
+         const char = charQ.rows[0];
+         if (!char) return;
+ 
+@@ -1137,8 +1122,8 @@ module.exports = function setupSocket(io) {
+         const updatedSpells = { ...currentSpells, slots: newSlots, slots_used: newSlotsUsed };
+ 
+         await db.query(
+-          `UPDATE characters SET level=$1, hp_max=$2, hp_current=$3, proficiency_bonus=$4, spells=$5 WHERE id=$6`,
+-          [newLevel, newHpMax, newHpCurr, newProf, JSON.stringify(updatedSpells), char.id]
++          `UPDATE characters SET level=$1, hp_max=$2, hp_current=$3, proficiency_bonus=$4, spells=$5 WHERE id=$6 AND campaign_id=$7`,
++          [newLevel, newHpMax, newHpCurr, newProf, JSON.stringify(updatedSpells), char.id, campaign_id]
+         );
+         await db.query(
+           "UPDATE level_up_requests SET status='approved', hp_roll=$1, hp_gained=$2, resolved_at=NOW() WHERE id=$3",
+@@ -1167,7 +1152,7 @@ module.exports = function setupSocket(io) {
+       } catch (err) {
+         console.error('[WS] level_up_resolve error:', err);
+       }
+-    });
++    }));
+ 
+     // ── Déconnexion ───────────────────────────────────────
+     socket.on('disconnect', () => {

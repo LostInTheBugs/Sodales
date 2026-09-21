@@ -54,7 +54,7 @@ async function dropDatabase() {
   } catch { /* best effort */ }
 }
 
-async function startServer() {
+async function startServer(extraEnv = {}) {
   const child = spawn(process.execPath, [path.join(__dirname, '..', 'server.js')], {
     cwd: path.join(__dirname, '..'),
     env: {
@@ -64,6 +64,7 @@ async function startServer() {
       PORT,
       NODE_ENV: 'test',
       ALLOWED_ORIGIN: '',
+      ...extraEnv,
     },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
@@ -78,7 +79,7 @@ async function startServer() {
     } catch { /* pas encore prêt */ }
     await new Promise((r) => setTimeout(r, 250));
   }
-  // Le serveur applique schema.sql au démarrage : attendre que les tables
+  // Le serveur applique les migrations au démarrage : attendre que les tables
   // existent réellement avant de rendre la main (le health répond avant).
   const c = new Client({ connectionString: dbUrl() });
   await c.connect();

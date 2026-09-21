@@ -551,7 +551,7 @@ function renderCampaignDetail(camp) {
 
 function renderCharCard(c, canEdit) {
   const portrait = c.portrait_url
-    ? `<img src="${esc(c.portrait_url)}" alt="${esc(c.name)}" data-act="hideSelfShowNext">`
+    ? `<img src="${esc(c.portrait_url)}" alt="${esc(c.name)}" data-act="hideSelfShowNext" data-a='["$el"]'>`
     : '';
   const stats = c.stats || {};
   return `

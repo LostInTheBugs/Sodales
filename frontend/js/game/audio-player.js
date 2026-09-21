@@ -832,7 +832,7 @@ function renderCustomTracks() {
     const safeUrl = t.url.replace(/'/g, "\\'");
     const safeName = t.name.replace(/'/g, "\\'");
     const gmBtns = myRole === 'gm' ? `
-      <button class="audio-track-add" data-act="queueFromEl" data-url="${safeUrl}" data-name="${safeName}" title="Ajouter à la file">＋</button>
+      <button class="audio-track-add" data-act="queueFromEl" data-a='["$el"]' data-url="${safeUrl}" data-name="${safeName}" title="Ajouter à la file">＋</button>
       <button class="audio-track-del" data-act="deleteCustomTrack" data-a='[${idx}, "$event"]' title="Supprimer">🗑</button>` : '';
     return `<div class="audio-track-row" data-id="${esc(t.url)}"
       data-act="selectAudioTrackRow" data-url="${safeUrl}" data-name="${safeName}"
@@ -879,7 +879,7 @@ function buildAudioTrackList() {
     div.dataset.id = t.url;
     const tname = `${t.icon} ${t.name}`;
     const addBtn = myRole === 'gm'
-      ? `<button class="audio-track-add" data-act="queueFromEl" data-url="${t.url}" data-name="${tname.replace(/&/g,'&amp;').replace(/"/g,'&quot;')}"\\'")}',event)" title="Ajouter à la file">＋</button>`
+      ? `<button class="audio-track-add" data-act="queueFromEl" data-a='["$el"]' data-url="${t.url}" data-name="${tname.replace(/&/g,'&amp;').replace(/"/g,'&quot;')}" title="Ajouter à la file">＋</button>`
       : '';
     div.innerHTML = `<span class="audio-track-icon">${t.icon}</span><span class="audio-track-name">${t.name}</span>${addBtn}`;
     if (myRole === 'gm') {

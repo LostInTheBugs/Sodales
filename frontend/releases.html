@@ -107,13 +107,36 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:.
 
   <div class="timeline">
 
-    <!-- 2026.09.018 — Actuelle -->
+    <!-- 2026.09.019 — Actuelle -->
     <div class="release latest">
+      <div class="release-dot"></div>
+      <div class="release-head">
+        <span class="release-version">2026.09.019</span>
+        <span class="release-date">Septembre 2026</span>
+        <span class="release-tag tag-latest">Actuelle</span>
+      </div>
+      <div class="release-body">
+        <div class="change-group">
+          <div class="change-group-title">Migrations, durcissement et documentation</div>
+          <ul class="change-list">
+            <li class="improve"><strong>Migrations de base numérotées</strong> — fini le fichier cumulatif : chaque changement est un fichier <code>NNN_*.sql</code> appliqué une seule fois (verrou anti-concurrence, bases existantes reconnues).</li>
+            <li class="improve"><strong>Plus aucune dépendance externe au chargement</strong> — three.js, marked et DOMPurify servis par l'instance ; l'aperçu Markdown se rabat sur du texte échappé si le filtre manque.</li>
+            <li class="fix"><strong>Six boutons silencieusement cassés</strong> (suppression d'objet/sort, portraits, file audio, code d'invitation) — réparés et vérifiés.</li>
+            <li class="fix"><strong>install.sh réparé</strong> (une erreur de syntaxe l'empêchait d'être exécuté).</li>
+            <li class="improve"><strong>Sauvegarde / restauration</strong> : <code>backup.sh</code> et <code>restore.sh</code>, restauration testée sur une base jetable.</li>
+            <li class="improve">Docker durci (versions figées, limites, rotation des journaux) ; tests d'upload ; matrice de permissions et guide d'utilisation dans <code>docs/</code>.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2026.09.018 -->
+    <div class="release">
       <div class="release-dot"></div>
       <div class="release-head">
         <span class="release-version">2026.09.018</span>
         <span class="release-date">Septembre 2026</span>
-        <span class="release-tag tag-latest">Actuelle</span>
+        <span class="release-tag">Précédente</span>
       </div>
       <div class="release-body">
         <div class="change-group">

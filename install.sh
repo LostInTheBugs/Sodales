@@ -133,14 +133,14 @@ else
     PGCONNECT_TIMEOUT=5 psql "$DATABASE_URL" -c '\q' 2>/dev/null \
       && success "Connexion OK." \
       || warn "Connexion impossible. Vérifiez DATABASE_URL si le démarrage échoue."
-    # Appliquer le schéma
-    info "Application du schéma SQL..."
-    PGCONNECT_TIMEOUT=5 psql "$DATABASE_URL" -f backend/schema.sql 2>/dev/null \
-      && success "Schéma appliqué." \
-      || warn "Schéma non appliqué automatiquement. Appliquez backend/schema.sql manuellement."
+    # Appliquer la première migration (le serveur appliquera les suivantes)
+    FIRST_MIGRATION=$(ls backend/migrations/*.sql 2>/dev/null | head -1)
+    info "Application des migrations SQL..."
+    PGCONNECT_TIMEOUT=5 psql "$DATABASE_URL" -f "$FIRST_MIGRATION" 2>/dev/null \
+      && success "Base initialisée." \
+      || warn "Migrations non appliquées automatiquement — le serveur les appliquera à son démarrage."
   else
-    warn "psql non disponible — appliquez le schéma manuellement :"
-    warn "  psql \"\$DATABASE_URL\" -f $(pwd)/backend/schema.sql"
+    warn "psql non disponible — le serveur appliquera les migrations à son démarrage."
   fi
 fi
 
@@ -169,7 +169,7 @@ chmod 755 frontend/uploads
 # Copier les cartes par défaut si pas encore présentes
 if [[ -d frontend/maps ]]; then
   COPIED=0
-  for f in frontend/maps/*.jpg frontend/maps/*.png 2>/dev/null; do
+  for f in frontend/maps/*.jpg frontend/maps/*.png; do
     [[ -f "$f" ]] || continue
     DEST="frontend/uploads/$(basename "$f")"
     [[ ! -f "$DEST" ]] && cp "$f" "$DEST" && COPIED=$((COPIED+1))

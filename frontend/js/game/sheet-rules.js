@@ -58,7 +58,7 @@ function addItemRow(name='', qty=1, weight=null) {
     <input type="number" class="item-qty" min="1" value="${qty}" title="Quantité"/>
     <input type="number" class="item-weight-inp" min="0" step="0.5" value="${wVal}" placeholder="kg" title="Poids (kg)"/>
     <span class="item-weight-unit">kg</span>
-    <button class="item-del" data-act="removeParent">🗑</button>`;
+    <button class="item-del" data-act="removeParent" data-a='["$el"]'>🗑</button>`;
   list.appendChild(div);
 }
 
@@ -112,7 +112,7 @@ function addSpellRow(name='', level=0) {
   div.className = 'item-row';
   div.innerHTML = `<span class="item-name"><input type="text" style="background:none;border:none;color:var(--text);width:100%;outline:none;" placeholder="Nom du sort" value="${esc(name)}"/></span>
     <input type="number" class="item-qty" min="0" max="9" value="${level}" title="Niveau du sort"/>
-    <button class="item-del" data-act="removeParent">🗑</button>`;
+    <button class="item-del" data-act="removeParent" data-a='["$el"]'>🗑</button>`;
   list.appendChild(div);
 }
 

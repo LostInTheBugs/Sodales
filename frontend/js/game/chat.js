@@ -436,7 +436,7 @@ function showHandoutView(h) {
     ? `<img src="${esc(h.image_url)}" class="journal-view-image" alt="">`
     : '';
   const textHtml = h.content
-    ? `<div class="journal-view-text">${(window.marked ? (window.DOMPurify ? DOMPurify.sanitize(marked.parse(h.content)) : marked.parse(h.content)) : esc(h.content).replace(/\n/g,'<br>'))}</div>`
+    ? `<div class="journal-view-text">${(window.marked && window.DOMPurify ? DOMPurify.sanitize(marked.parse(h.content)) : esc(h.content).replace(/\n/g,'<br>'))}</div>`
     : '';
   const gmActions = myRole === 'gm' ? `
     <div class="journal-actions">
@@ -523,7 +523,7 @@ function switchMdTab(tab) {
   if (!editPanel) return;
   if (tab === 'preview') {
     const content = document.getElementById('heContent')?.value || '';
-    previewPanel.innerHTML = window.marked ? (window.DOMPurify ? DOMPurify.sanitize(marked.parse(content)) : marked.parse(content)) : esc(content).replace(/\n/g,'<br>');
+    previewPanel.innerHTML = (window.marked && window.DOMPurify) ? DOMPurify.sanitize(marked.parse(content)) : esc(content).replace(/\n/g,'<br>');
     editPanel.style.display    = 'none';
     previewPanel.style.display = '';
     toolbar.style.display      = 'none';

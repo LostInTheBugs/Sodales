@@ -9,13 +9,21 @@
 #   COMPOSE_PROFILES=          docker compose up -d  (tout externe)
 #
 # install.sh gère cette variable automatiquement.
+#
+# Durcissement :
+#   - images figées sur des versions précises (reproductibilité) ;
+#   - PostgreSQL jamais publié sur l'hôte (réseau interne uniquement) ;
+#   - backend lié à 127.0.0.1 par défaut (RPG_BIND) ;
+#   - journaux Docker bornés (rotation automatique) ;
+#   - limites mémoire/CPU généreuses : ajustez selon la machine.
+# Sauvegardes : voir backup.sh / restore.sh.
 
 services:
 
   # ── Base de données (optionnelle) ──────────────────────────
   rpg-db:
     profiles: [db]
-    image: postgres:15-alpine
+    image: postgres:15.8-alpine
     container_name: rpg-db
     restart: unless-stopped
     environment:
@@ -29,6 +37,12 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks: [sodales]
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+    mem_limit: 1g
+    cpus: 2
 
   # ── Backend RPG ────────────────────────────────────────────
   rpg:
@@ -39,7 +53,8 @@ services:
     container_name: rpg
     restart: unless-stopped
     ports:
-      # Exposé directement si pas de nginx intégré, sinon accessible via nginx uniquement
+      # Exposé directement si pas de nginx intégré, sinon accessible via nginx uniquement.
+      # 127.0.0.1 par défaut : l'accès direct est réservé au développement / TLS externe.
       - "${RPG_BIND:-127.0.0.1}:${RPG_PORT:-8007}:${RPG_PORT:-8007}"
     environment:
       DATABASE_URL: "${DATABASE_URL}"
@@ -54,11 +69,17 @@ services:
       interval: 15s
       timeout: 10s
       retries: 10
+    networks: [sodales]
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+    mem_limit: 1g
+    cpus: 2
 
   # ── Nginx intégré (optionnel) ──────────────────────────────
   nginx:
     profiles: [nginx]
-    image: nginx:alpine
+    image: nginx:1.27-alpine
     container_name: nginx-rpg
     restart: unless-stopped
     ports:
@@ -72,17 +93,33 @@ services:
       - nginx-logs:/var/log/nginx
     depends_on:
       - rpg
+    networks: [sodales]
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+    mem_limit: 256m
+    cpus: 1
 
   certbot:
     profiles: [nginx]
-    image: certbot/certbot:latest
+    image: certbot/certbot:v5.8.0
     container_name: certbot-rpg
     restart: "no"
     volumes:
       - ./certbot/www:/var/www/certbot
       - ./certbot/conf:/etc/letsencrypt
     command: renew --quiet
+    networks: [sodales]
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+    mem_limit: 256m
+    cpus: 1
 
 volumes:
   rpg-db:
   nginx-logs:
+
+networks:
+  sodales:
+    driver: bridge

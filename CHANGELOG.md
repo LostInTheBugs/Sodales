@@ -2,6 +2,17 @@
 
 All notable changes to Sodales are documented in this file.
 
+## 2026.09.019 (2026-09-21)
+
+### External review follow-up — migrations, hardening, tests, docs
+- **Numbered SQL migrations** replace the cumulative `schema.sql`: `backend/migrations/NNN_*.sql` applied at server start (and by `install.sh` / `update.sh` / `deploy.sh`) through `migrations/run.js` — idempotent, serialised by a PostgreSQL advisory lock, baseline-aware for databases created before the change. Tests cover fresh / re-run / baseline / failed-migration paths. Fixed a **pre-existing syntax error in `install.sh`** (the installer did not parse at all).
+- **No external runtime dependency left in the frontend**: three.js, marked and DOMPurify vendored in `js/vendor/`, the Socket.io client served by the app itself → CSP `script-src 'self'` (both CDN origins removed). Markdown rendering now fails **closed** (escaped) when the sanitiser is unavailable.
+- **Six `data-act` handlers were missing their `$el` argument** (item/spell row delete, portrait fallbacks, audio queue button, invite-code input) — silent regressions from the CSP migration. Fixed; a scanner guards this class of bug.
+- **Uploads**: tests added (valid upload → UUID filename, content/extension mismatch → rejected *and* deleted from disk, SVG refused, delete permissions).
+- **Deployment hardening**: pinned images (`postgres:15.8-alpine`, `nginx:1.27-alpine`, `certbot/certbot:v5.8.0`), explicit Docker network, log rotation, CPU/memory limits, PostgreSQL never published on the host.
+- **Backups**: `backup.sh` / `restore.sh` (pg_dump + uploads, retention); restore verified against a scratch database with row-count comparison.
+- **Docs**: `docs/PERMISSIONS.md` (permission matrix mapped to the covering test), `docs/USAGE.md` (GM/player guide, backups, updates, media), Dependabot config.
+
 ## 2026.09.018 (2026-09-21)
 
 ### Removals — Star Wars / The Lord of the Rings systems, and per-character videos
