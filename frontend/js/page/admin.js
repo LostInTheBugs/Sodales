@@ -226,7 +226,7 @@ function renderUsers(users) {
       <td class="text-sm text-muted">${fmtDate(u.created_at)}</td>
       <td>
         <div class="btn-row">
-          <button class="btn-xs btn-primary" onclick='openEditUser(${JSON.stringify(u)})'>✏</button>
+          <button class="btn-xs btn-primary" data-act="openEditUserBtn" data-a='["$el"]' data-user="${esc(JSON.stringify(u))}">✏</button>
           ${!isMe ? `<select class="btn-xs" data-act="setTier" data-a='["${u.id}", "${esc(u.username)}", "$value"]' style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:.15rem .3rem;border-radius:4px;font-size:.7rem;">
             <option value="player" ${u.tier==='player'?'selected':''}>👤 Joueur</option>
             <option value="creator" ${u.tier==='creator'?'selected':''}>🛠 Créateur</option>
@@ -502,3 +502,10 @@ setInterval(() => {
     loadOnline();
   }
 }, 30000);
+
+// ── Action CSP : ouvrir l'édition d'un utilisateur (remplace un onclick inline) ──
+window.ACT = window.ACT || {};
+ACT.openEditUserBtn = (el) => {
+  try { openEditUser(JSON.parse(el.dataset.user)); }
+  catch (err) { console.warn('[admin] utilisateur illisible :', err); }
+};

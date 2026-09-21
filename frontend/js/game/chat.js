@@ -276,7 +276,7 @@ function renderTableEditor(t) {
     </div>
     <div class="journal-actions">
       <button class="btn-primary" data-act="saveTable" data-a='[${t ? `"${t.id}"` : 'null'}]' style="padding:.4rem .9rem;">💾 Enregistrer</button>
-      <button class="journal-new-btn" onclick="${t ? `selectTable('${t.id}')` : 'resetTablesDetail()'}">Annuler</button>
+      <button class="journal-new-btn" data-act="annulerEditionTable" data-a='["${t ? t.id : ""}"]'>Annuler</button>
     </div>
   `;
   renderTeEntries();
@@ -504,7 +504,7 @@ function showHandoutForm(id) {
     </div>
     <div class="journal-actions" style="flex-shrink:0;">
       <button class="btn-primary" data-act="saveHandout" data-a='[${h ? `"${h.id}"` : 'null'}]' style="padding:.4rem .9rem;">💾 Enregistrer</button>
-      <button class="journal-new-btn" onclick="${h ? `selectHandout('${h.id}')` : 'closeJournalEdit()'}">Annuler</button>
+      <button class="journal-new-btn" data-act="annulerEditionHandout" data-a='["${h ? h.id : ""}"]'>Annuler</button>
     </div>
   `;
   // Live preview URL image
@@ -788,3 +788,8 @@ async function deleteMacro(id) {
     renderMacroList();
   } catch (e) { alert(e.message); }
 }
+
+// ── Actions CSP : boutons « Annuler » du journal (remplacent des onclick inline) ──
+window.ACT = window.ACT || {};
+ACT.annulerEditionTable = (id) => { if (id) selectTable(id); else resetTablesDetail(); };
+ACT.annulerEditionHandout = (id) => { if (id) selectHandout(id); else closeJournalEdit(); };

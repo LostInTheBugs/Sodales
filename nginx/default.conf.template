@@ -33,7 +33,7 @@ server {
     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
     add_header X-Frame-Options SAMEORIGIN;
     add_header X-Content-Type-Options nosniff;
-    # CSP en mode observation : mesure les scripts inline sans rien bloquer.
+    # CSP appliquée (aucun script inline, tout est servi par l'instance).
     add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self' ws: wss: https://www.dnd5eapi.co; object-src 'none'; base-uri 'self'; frame-ancestors 'self'; form-action 'self'" always;
 
     root  /usr/share/nginx/html;
@@ -55,5 +55,11 @@ server {
     # ── Frontend statique ──────────────────────────────────
     location / {
         try_files $uri $uri/ =404;
+    }
+
+    # Les médias téléversés sont accessibles par leur URL (UUID non devinable),
+    # jamais indexés par les moteurs de recherche.
+    location /uploads/ {
+        add_header X-Robots-Tag "noindex, nofollow" always;
     }
 }

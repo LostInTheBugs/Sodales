@@ -18,7 +18,17 @@ if (!ALLOWED_ORIGIN) {
 const CORS_ORIGIN = ALLOWED_ORIGIN || false;
 
 const app = express();
-app.set('trust proxy', 1); // Apache proxy — nécessaire pour express-rate-limit
+// Nombre de proxys de confiance devant l'application (express-rate-limit).
+// 1 = un seul proxy (nginx intégré ou proxy externe qui réécrit X-Forwarded-For).
+// Multi-hop (ex. CDN + nginx) : TRUST_PROXY=2, ou le nombre de sauts réels.
+// Vérifié : un X-Forwarded-For forgé par le client est ignoré (nginx ajoute
+// l'adresse réelle en dernier, et Express ne lit que le dernier saut de confiance).
+app.set('trust proxy', (() => {
+  const v = process.env.TRUST_PROXY;
+  if (v === undefined || v === '') return 1;
+  const n = Number(v);
+  return Number.isNaN(n) ? v : n; // nombre, ou expression acceptée par Express ('loopback', …)
+})());
 const server = http.createServer(app);
 
 // ── Socket.io ────────────────────────────────────────────────

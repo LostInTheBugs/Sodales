@@ -1,6 +1,6 @@
 {
   "name": "sodales-backend",
-  "version": "2026.09.020",
+  "version": "2026.09.021",
   "description": "Sodales — self-hosted virtual tabletop (VTT) backend",
   "main": "server.js",
   "scripts": {

@@ -177,6 +177,14 @@ Full breakdown: [TOKENS.md](TOKENS.md).
 
 MIT — see [LICENSE](LICENSE).
 
+
+## File access model
+
+Uploaded files (`/uploads/…`) are served statically and are readable by **anyone who has the exact
+URL** — the name is an unguessable UUID, listings are disabled and the files are marked
+`noindex, nofollow`, but there is no per-campaign check on the download. Treat them as
+shareable-by-link, not secret. Details and the `TRUST_PROXY` table: [docs/PERMISSIONS.md](docs/PERMISSIONS.md).
+
 ## Trademarks & third-party content
 
 Sodales is an unofficial, non-commercial project — not affiliated with, sponsored or

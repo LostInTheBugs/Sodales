@@ -52,4 +52,10 @@ server {
     location / {
         try_files $uri $uri/ =404;
     }
+
+    # Les médias téléversés sont accessibles par leur URL (UUID non devinable),
+    # jamais indexés par les moteurs de recherche.
+    location /uploads/ {
+        add_header X-Robots-Tag "noindex, nofollow" always;
+    }
 }

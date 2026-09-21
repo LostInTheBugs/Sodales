@@ -47,4 +47,10 @@
     RewriteCond %{HTTP:Upgrade} websocket [NC]
     RewriteCond %{HTTP:Connection} upgrade [NC]
     RewriteRule ^/rpg/socket.io/(.*) ws://127.0.0.1:8007/rpg/socket.io/$1 [P,L]
+
+    # Les médias téléversés sont accessibles par leur URL (UUID non devinable),
+    # jamais indexés par les moteurs de recherche.
+    <Location /uploads/>
+        Header always set X-Robots-Tag "noindex, nofollow"
+    </Location>
 </VirtualHost>

@@ -107,13 +107,51 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:.
 
   <div class="timeline">
 
-    <!-- 2026.09.019 — Actuelle -->
+    <!-- 2026.09.021 — Actuelle -->
     <div class="release latest">
+      <div class="release-dot"></div>
+      <div class="release-head">
+        <span class="release-version">2026.09.021</span>
+        <span class="release-date">Septembre 2026</span>
+        <span class="release-tag tag-latest">Actuelle</span>
+      </div>
+      <div class="release-body">
+        <div class="change-group">
+          <div class="change-group-title">Sécurité — modèle d'accès des fichiers et reste de la CSP</div>
+          <ul class="change-list">
+            <li class="improve"><strong>Modèle d'accès des fichiers documenté</strong> : les médias téléversés sont lisibles par toute personne ayant l'URL exacte (nom UUID, pas de listing, <code>noindex, nofollow</code> ajouté) — dit clairement, plutôt que de faire passer l'UUID pour un contrôle d'accès.</li>
+            <li class="improve"><strong>TRUST_PROXY configurable</strong> (déploiements multi-niveaux) ; la topologie nginx intégrée est vérifiée : un <code>X-Forwarded-For</code> forgé n'échappe pas au limiteur de connexion.</li>
+            <li class="fix"><strong>Trois derniers boutons inertes</strong> (Annuler du journal ×2, édition d'utilisateur) réparés — les <code>onclick</code> inline restants étaient bloqués par la CSP.</li>
+            <li class="improve"><strong>Garde-fou en CI</strong> : toute action <code>data-act</code> doit exister, les actions qui attendent l'élément doivent porter <code>$el</code>, aucun gestionnaire inline ne peut réapparaître.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2026.09.020 -->
+    <div class="release">
+      <div class="release-dot"></div>
+      <div class="release-head">
+        <span class="release-version">2026.09.020</span>
+        <span class="release-date">Septembre 2026</span>
+        <span class="release-tag">Précédente</span>
+      </div>
+      <div class="release-body">
+        <div class="change-group">
+          <ul class="change-list">
+            <li class="fix"><strong>Quota d'upload sérialisé</strong> — le contrôle du stockage (500 Mo) est fait dans une transaction avec verrou de ligne : deux envois simultanés ne peuvent plus se glisser ensemble sous la limite.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2026.09.019 -->
+    <div class="release">
       <div class="release-dot"></div>
       <div class="release-head">
         <span class="release-version">2026.09.019</span>
         <span class="release-date">Septembre 2026</span>
-        <span class="release-tag tag-latest">Actuelle</span>
+        <span class="release-tag">Précédente</span>
       </div>
       <div class="release-body">
         <div class="change-group">

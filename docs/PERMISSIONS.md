@@ -31,6 +31,37 @@ Who can do what, and which automated test proves it.
 | Cross-campaign isolation | enforced | enforced | enforced | `map-sync.socket.test.js` (cloisonnement) |
 | Revoked JWT | refused at handshake | refused | refused | `authz.socket.test.js` |
 
+## Uploaded files — access model (explicit)
+
+Uploaded files are served as static resources from `/uploads/<uuid>.<ext>`.
+
+- **Who can read a file: anyone who has its exact URL.** The name is a random UUID (not
+  guessable, not enumerable, directory listing disabled, `X-Robots-Tag: noindex, nofollow`),
+  but there is **no per-user or per-campaign access check** on the download itself.
+- Files are **not campaign-scoped**: the same portrait or map can be referenced from several
+  campaigns.
+- Consequence: **treat uploads as shareable-by-link, not secret.** Do not use them for private
+  documents. This matches the model used by other self-hosted VTTs; if you need
+  campaign-private media, put the webroot behind an authentication layer
+  (`auth_request` / Apache `Require`) — the browser sends no cookie today, so `img` tags would
+  need that layer rather than a Bearer token.
+- The API side *is* protected: listing is per-user, deletion is restricted to the owner (or an
+  admin), and the content is validated (magic bytes) and quota-checked on upload.
+
+## trust proxy
+
+`TRUST_PROXY` (default `1`) configures how many proxies Express trusts, which drives the client
+IP used by the rate limiters.
+
+| Deployment | Value |
+|---|---|
+| Bundled nginx, or a single external proxy that sets `X-Forwarded-For` | `1` (default) |
+| CDN + proxy (two hops) | `2` |
+
+Verified on the production instance: a client sending forged `X-Forwarded-For` values still gets
+rate-limited by its **real** address (nginx appends the real IP last and Express only reads the
+last trusted hop).
+
 ## Notes
 
 - Roles are re-read from the database on every request (`authMiddleware` overwrites `is_admin`/`tier`);

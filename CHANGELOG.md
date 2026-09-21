@@ -2,6 +2,14 @@
 
 All notable changes to Sodales are documented in this file.
 
+## 2026.09.021 (2026-09-21)
+
+### Security follow-up — file access model, trust proxy, CSP leftovers
+- **Documented file access model** (`/uploads/` = readable by anyone with the exact URL; UUID names, no listings, `X-Robots-Tag: noindex, nofollow` added to the nginx and Apache configs) — the honest counterpart of *not* pretending UUIDs are an access control.
+- **`TRUST_PROXY` is configurable** (default 1) for multi-hop deployments; the bundled-nginx topology was verified against forged `X-Forwarded-For` headers (still rate-limited by the real client address) and two hops are now documented.
+- **Three last inline handlers removed** (`Annuler` buttons of the journal, admin "edit user" button) — they were dead under `script-src 'self'`.
+- **New CI guard** (`csp-markup.test.js`): every `data-act` must exist, element-first actions must carry `data-a='["$el"]'`, and no inline handler or external script may reappear — the class of bug that silently broke six buttons is now a test.
+
 ## 2026.09.020 (2026-09-21)
 
 ### Fixes — serialised upload quota
