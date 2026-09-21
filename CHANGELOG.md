@@ -2,6 +2,14 @@
 
 All notable changes to Sodales are documented in this file.
 
+## 2026.09.002 (2026-09-21)
+
+### Corrections
+- **Character sheet modal broken on the game page** — the "✏ Modifier la fiche" button no longer opened (JavaScript ReferenceError: race, class and subclass lists were referenced but had been removed by mistake in an earlier cleanup). Subclass lists restored; race and class lists now come from the campaign's game system (all 15 systems, instead of two hard-coded lists).
+
+### Technical
+- Frontend-only fix (`frontend/game.html`) — no schema or API change.
+
 ## 2026.09.001 (2026-09-21)
 
 ### Changed
