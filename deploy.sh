@@ -147,6 +147,12 @@ if $SCHEMA_CHANGED; then
   fi
 fi
 
+# ── 9 bis. Médias hors dépôt (si absents de ce clone) ──────────
+if [ "$(find frontend/img -maxdepth 1 -name '*.jpg' 2>/dev/null | wc -l)" -lt 10 ]; then
+  info "Médias absents du clone — récupération depuis la release assets..."
+  bash ./fetch-assets.sh || warn "Médias non récupérés (rsync sans --delete : le site garde ses copies)."
+fi
+
 # ── 10. Copier le frontend vers Apache ─────────────────────────
 if $FRONTEND_CHANGED || $MAPS_CHANGED; then
   info "Copie du frontend vers Apache (${APACHE_DOCROOT})..."

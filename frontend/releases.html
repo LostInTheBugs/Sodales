@@ -106,13 +106,32 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:.
 
   <div class="timeline">
 
-    <!-- 2026.09.005 — Actuelle -->
+    <!-- 2026.09.006 — Actuelle -->
     <div class="release latest">
+      <div class="release-dot"></div>
+      <div class="release-head">
+        <span class="release-version">2026.09.006</span>
+        <span class="release-date">Septembre 2026</span>
+        <span class="release-tag tag-latest">Actuelle</span>
+      </div>
+      <div class="release-body">
+        <div class="change-group">
+          <div class="change-group-title">Dépôt &amp; installation</div>
+          <ul class="change-list">
+            <li class="improve"><strong>Dépôt allégé</strong> — les médias (portraits, vidéos, musique, ~95 Mo) ne sont plus dans git : ils sont publiés dans une release dédiée et récupérés automatiquement à l'installation</li>
+            <li class="improve"><strong>fetch-assets.sh</strong> — script idempotent (appelé par install.sh et deploy.sh) pour télécharger les médias ; l'application fonctionne sans (images manquantes seulement)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2026.09.005 -->
+    <div class="release">
       <div class="release-dot"></div>
       <div class="release-head">
         <span class="release-version">2026.09.005</span>
         <span class="release-date">Septembre 2026</span>
-        <span class="release-tag tag-latest">Actuelle</span>
+        <span class="release-tag">Précédente</span>
       </div>
       <div class="release-body">
         <div class="change-group">

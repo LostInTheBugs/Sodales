@@ -59,6 +59,20 @@ The script asks three questions at startup:
 
 The script then automatically generates the secrets (JWT, DB password) and starts the application.
 
+## Media assets
+
+The heavy media files (character portraits, I2V videos, music tracks — ~95 MB) are
+**not stored in git** so the repository stays light. They ship as a dedicated
+[`assets-2026.09`](https://github.com/LostInTheBugs/Sodales/releases/tag/assets-2026.09)
+GitHub release, and the installer fetches them for you:
+
+```bash
+./fetch-assets.sh          # called automatically by install.sh
+```
+
+The app runs fine without them (missing portraits / videos / music), so a plain
+clone is enough for development. `SODALES_ASSETS_URL` overrides the download URL.
+
 ## Configuration
 
 Copy the example file and edit the variables:

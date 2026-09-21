@@ -33,3 +33,9 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo
+
+# ── Médias hors dépôt (~95 Mo : portraits, vidéos I2V, musique) ──
+# Récupérés via ./fetch-assets.sh (release « assets-2026.09 ») — voir README.
+frontend/img/*.jpg
+frontend/img/*.mp4
+frontend/music/*.mp3

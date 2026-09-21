@@ -2,6 +2,13 @@
 
 All notable changes to Sodales are documented in this file.
 
+## 2026.09.006 (2026-09-21)
+
+### Repository & installer — media out of git
+- The heavy media (~95 MB: 256 character portraits, 118 I2V videos, 10 music tracks) are no longer stored in git. They now ship as a dedicated `assets-2026.09` GitHub release, fetched by the new `fetch-assets.sh` (called automatically by `install.sh`, and by `deploy.sh` when the clone lacks them).
+- Git history was rewritten accordingly: the repository drops from ~108 MB to a few MB.
+- The app still runs without the assets (missing portraits/videos/music) — a plain clone is enough for development.
+
 ## 2026.09.005 (2026-09-21)
 
 ### Security — review follow-up #2

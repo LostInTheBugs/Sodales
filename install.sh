@@ -255,6 +255,14 @@ if ! $USE_BUNDLED_NGINX; then
   echo "    nginx/sodales-apache.conf.example"
 fi
 
+# ── 11 bis. Médias (portraits, vidéos, musique) ───────────────
+info "Récupération des médias (portraits, vidéos, musique)..."
+if bash ./fetch-assets.sh; then
+  success "Médias installés."
+else
+  warn "Médias non installés — relancez ./fetch-assets.sh plus tard."
+fi
+
 # ── 12. Fin ───────────────────────────────────────────────────
 echo ""
 echo -e "${GREEN}╔══════════════════════════════════════════════════════╗${NC}"
